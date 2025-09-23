@@ -1,142 +1,134 @@
-<!-- templates/lanzamientos.html -->
 {% extends "base.html" %}
 
+{% block title %}Lanzamientos - Gestión de Lanzamientos{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Lanzamientos</h1>
-    <a href="/lanzamientos/nuevo" class="btn btn-success">Nuevo Lanzamiento</a>
+    <a href="{{ url_for('nuevo_lanzamiento') }}" class="btn btn-success">Añadir Lanzamiento</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('listar_lanzamientos') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="q" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre o colección...">
+                </div>
+                <div class="col-md-2">
+                    <label for="start_date" class="form-label">Desde</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="end_date" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="hide_past" name="hide_past" {% if filters.hide_past == 'on' %}checked{% endif %}>
+                        <label class="form-check-label" for="hide_past">Ocultar pasados</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{{ url_for('listar_lanzamientos') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-striped table-hover">
         <thead>
             <tr>
-                <th></th>
+                <th style="width: 2rem;"></th>
                 <th>Nombre</th>
                 <th>Colección</th>
                 <th>Fecha de Salida</th>
+                <th>Fecha de Envío</th>
                 <th>Precio</th>
                 <th>Reserva</th>
-                <th>Tipo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="accordion">
             {% for lanzamiento in lanzamientos %}
-            <tr>
+            <tr class="accordion-header">
                 <td>
-                    <button class="btn btn-sm btn-outline-primary toggle-reservas" 
-                            data-lanzamiento-id="{{ lanzamiento.id }}"
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#reservas-{{ lanzamiento.id }}">
-                        ▶
+                    {% if lanzamiento.reservas %}
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ lanzamiento.id }}" aria-expanded="false" aria-controls="collapse-{{ lanzamiento.id }}">
+                        <i class="bi bi-chevron-down"></i>
                     </button>
+                    {% endif %}
                 </td>
                 <td>{{ lanzamiento.nombre }}</td>
                 <td>
-                    <span class="badge 
-                        {% if lanzamiento.coleccion == 'Marvel\'s Spiderman' %}bg-danger
-                        {% elif lanzamiento.coleccion == 'EVENTOS' %}bg-warning
-                        {% elif lanzamiento.coleccion == 'Avatar' %}bg-info
-                        {% else %}bg-secondary{% endif %}">
+                    <span class="badge" style="background-color: {{ lanzamiento.coleccion_data.color if lanzamiento.coleccion_data and lanzamiento.coleccion_data.color else '#6c757d' }} !important;">
                         {{ lanzamiento.coleccion }}
                     </span>
                 </td>
-                <td>{{ lanzamiento.fecha_salida }}</td>
-                <td>{{ lanzamiento.precio }}€</td>
-                <td>{{ lanzamiento.reserva }}€</td>
-                <td>{{ lanzamiento.tipo }}</td>
+                <td>{{ lanzamiento.fecha_salida | formato_fecha }}</td>
+                <td>{{ lanzamiento.fecha_envio | formato_fecha or 'N/A' }}</td>
+                <td>{{ "%.2f"|format(lanzamiento.precio) }}€</td>
+                <td>{{ "%.2f"|format(lanzamiento.reserva) }}€</td>
                 <td>
-                    <a href="/lanzamientos/{{ lanzamiento.id }}/eliminar" 
+                    <a href="{{ url_for('editar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <a href="{{ url_for('eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" 
                        class="btn btn-sm btn-outline-danger"
                        onclick="return confirm('¿Estás seguro?')">Eliminar</a>
                 </td>
             </tr>
-            <tr class="collapse" id="reservas-{{ lanzamiento.id }}">
-                <td colspan="8">
-                    <div class="p-3 bg-light">
-                        <h6>Reservas para {{ lanzamiento.nombre }}</h6>
-                        <div class="reservas-container" id="reservas-content-{{ lanzamiento.id }}">
-                            <div class="text-center">
-                                <div class="spinner-border spinner-border-sm" role="status">
-                                    <span class="visually-hidden">Cargando...</span>
-                                </div>
-                            </div>
+            {% if lanzamiento.reservas %}
+            <tr>
+                <td colspan="8" class="p-0">
+                    <div id="collapse-{{ lanzamiento.id }}" class="accordion-collapse collapse">
+                        <div class="accordion-body bg-light p-3">
+                            <h6 class="mb-2">Reservas para {{ lanzamiento.nombre }} ({{ lanzamiento.reservas|length }})</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Cantidad</th>
+                                        <th>Fecha Reserva</th>
+                                        <th>Estado</th>
+                                        <th>Pagado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in lanzamiento.reservas %}
+                                    <tr>
+                                        <td>{{ res.cliente.nombre if res.cliente else 'N/A' }}</td>
+                                        <td>{{ res.cantidad }}</td>
+                                        <td>{{ res.fecha_reserva | formato_fecha }}</td>
+                                        <td>
+                                            <span class="badge {% if res.estado == 'pendiente' %}bg-warning{% elif res.estado == 'confirmada' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ res.estado.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if res.pagado %}
+                                                <span class="badge bg-success">Sí</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">No</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </td>
+            </tr>
+            {% endif %}
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No se encontraron lanzamientos.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleButtons = document.querySelectorAll('.toggle-reservas');
-    
-    toggleButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const lanzamientoId = this.getAttribute('data-lanzamiento-id');
-            const content = document.getElementById(`reservas-content-${lanzamientoId}`);
-            
-            // Cambiar el icono
-            this.textContent = this.textContent === '▶' ? '▼' : '▶';
-            
-            // Cargar reservas si no están cargadas
-            if (content.innerHTML.includes('spinner-border')) {
-                fetch(`/api/lanzamientos/${lanzamientoId}/reservas`)
-                    .then(response => response.json())
-                    .then(reservas => {
-                        let html = '';
-                        if (reservas.length === 0) {
-                            html = '<p class="text-muted">No hay reservas para este lanzamiento</p>';
-                        } else {
-                            html = `
-                                <table class="table table-sm table-bordered">
-                                    <thead class="table-secondary">
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th>Cantidad</th>
-                                            <th>Fecha</th>
-                                            <th>Estado</th>
-                                            <th>Pagado</th>
-                                            <th>Notas</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                            `;
-                            
-                            reservas.forEach(reserva => {
-                                const estadoBadge = reserva.estado === 'confirmada' ? 'bg-success' : 
-                                                  reserva.estado === 'cancelada' ? 'bg-danger' : 'bg-warning';
-                                const pagadoBadge = reserva.pagado ? 'bg-success' : 'bg-secondary';
-                                
-                                html += `
-                                    <tr>
-                                        <td>${reserva.cliente ? reserva.cliente.nombre : 'Cliente no encontrado'}</td>
-                                        <td>${reserva.cantidad}</td>
-                                        <td>${reserva.fecha_reserva}</td>
-                                        <td><span class="badge ${estadoBadge}">${reserva.estado}</span></td>
-                                        <td><span class="badge ${pagadoBadge}">${reserva.pagado ? 'Sí' : 'No'}</span></td>
-                                        <td>${reserva.notas || '-'}</td>
-                                    </tr>
-                                `;
-                            });
-                            
-                            html += `
-                                    </tbody>
-                                </table>
-                            `;
-                        }
-                        content.innerHTML = html;
-                    })
-                    .catch(error => {
-                        content.innerHTML = '<p class="text-danger">Error al cargar las reservas</p>';
-                    });
-            }
-        });
-    });
-});
-</script>
 {% endblock %}

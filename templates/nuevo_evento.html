@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Evento - Gestión de Lanzamientos{% endblock %}
+
+{% block content %}
+<h1>Nuevo Evento</h1>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre del Evento</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="coleccion" class="form-label">Colección</label>
+        <input list="colecciones-list" class="form-control" id="coleccion" name="coleccion" required>
+        <datalist id="colecciones-list">
+            {% for coleccion in colecciones %}
+                <option value="{{ coleccion.nombre }}">
+            {% endfor %}
+        </datalist>
+    </div>
+    
+    <div class="mb-3">
+        <label for="fecha_salida" class="form-label">Fecha del Evento</label>
+        <input type="date" class="form-control" id="fecha_salida" name="fecha_salida" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="precio" class="form-label">Precio (€)</label>
+        <input type="number" step="0.01" class="form-control" id="precio" name="precio" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="reserva" class="form-label">Reserva (€)</label>
+        <input type="number" step="0.01" class="form-control" id="reserva" name="reserva" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="comentario" class="form-label">Comentario</label>
+        <textarea class="form-control" id="comentario" name="comentario" rows="3"></textarea>
+    </div>
+    
+    <button type="submit" class="btn btn-success">Crear Evento</button>
+    <a href="{{ url_for('listar_eventos') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

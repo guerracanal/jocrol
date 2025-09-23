@@ -1,41 +1,84 @@
-<!-- templates/index.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h1>Gestión de Lanzamientos Magic TCG</h1>
-        <p class="lead">Sistema para gestionar lanzamientos, clientes y reservas</p>
-        
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Lanzamientos</h5>
-                        <p class="card-text">Gestiona los próximos lanzamientos de cartas</p>
-                        <a href="/lanzamientos" class="btn btn-primary">Ver Lanzamientos</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Clientes</h5>
-                        <p class="card-text">Administra la base de datos de clientes</p>
-                        <a href="/clientes" class="btn btn-primary">Ver Clientes</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Reservas</h5>
-                        <p class="card-text">Gestiona las reservas de los clientes</p>
-                        <a href="/reservas" class="btn btn-primary">Ver Reservas</a>
-                    </div>
-                </div>
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold">Panel de Control</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">Bienvenido al sistema de gestión. Desde aquí puedes acceder a todas las secciones importantes de la aplicación.</p>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Calendario</h5>
+                <p class="card-text">Visualiza todos los lanzamientos y eventos en una única vista.</p>
+                <a href="{{ url_for('calendario') }}" class="btn btn-primary mt-auto">Ir al Calendario</a>
             </div>
         </div>
     </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Reservas</h5>
+                <p class="card-text">Administra y consulta las reservas de productos.</p>
+                <a href="{{ url_for('listar_reservas') }}" class="btn btn-primary mt-auto">Ver Reservas</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Lanzamientos</h5>
+                <p class="card-text">Gestiona los próximos lanzamientos de productos y colecciones.</p>
+                <a href="{{ url_for('listar_lanzamientos') }}" class="btn btn-primary mt-auto">Ver Lanzamientos</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Eventos</h5>
+                <p class="card-text">Organiza y gestiona los eventos especiales de la tienda.</p>
+                <a href="{{ url_for('listar_eventos') }}" class="btn btn-primary mt-auto">Ver Eventos</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Clientes</h5>
+                <p class="card-text">Administra la base de datos de tus clientes.</p>
+                <a href="{{ url_for('listar_clientes') }}" class="btn btn-primary mt-auto">Gestionar Clientes</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Staff</h5>
+                <p class="card-text">Gestiona los miembros del equipo y sus accesos.</p>
+                <a href="{{ url_for('listar_staff') }}" class="btn btn-primary mt-auto">Gestionar Staff</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 text-center">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Recordatorios</h5>
+                <p class="card-text">Consulta los recordatorios de eventos asignados al staff.</p>
+                <a href="{{ url_for('listar_recordatorios') }}" class="btn btn-primary mt-auto">Ver Recordatorios</a>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

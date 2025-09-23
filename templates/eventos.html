@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Eventos - Gestión de Lanzamientos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Eventos</h1>
+    <a href="{{ url_for('nuevo_evento') }}" class="btn btn-success">Añadir Evento</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('listar_eventos') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="q" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre o colección...">
+                </div>
+                <div class="col-md-2">
+                    <label for="start_date" class="form-label">Desde</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="end_date" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="hide_past" name="hide_past" {% if filters.hide_past == 'on' %}checked{% endif %}>
+                        <label class="form-check-label" for="hide_past">Ocultar pasados</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{{ url_for('listar_eventos') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Colección</th>
+            <th>Fecha</th>
+            <th>Precio</th>
+            <th>Reserva</th>
+            <th>Comentario</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for evento in eventos %}
+        <tr>
+            <td>{{ evento.nombre }}</td>
+            <td>
+                <span class="badge" style="background-color: {{ evento.coleccion_data.color if evento.coleccion_data and evento.coleccion_data.color else '#6c757d' }} !important;">
+                    {{ evento.coleccion }}
+                </span>
+            </td>
+            <td>{{ evento.fecha | formato_fecha }}</td>
+            <td>{{ "%.2f"|format(evento.precio) }}€</td>
+            <td>{{ "%.2f"|format(evento.reserva) }}€</td>
+            <td>{{ evento.comentario }}</td>
+            <td>
+                <a href="{{ url_for('eliminar_evento', evento_id=evento.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="text-center">No hay eventos.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

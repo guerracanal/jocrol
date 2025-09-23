@@ -1,4 +1,3 @@
-<!-- templates/nuevo_lanzamiento.html -->
 {% extends "base.html" %}
 
 {% block content %}
@@ -12,17 +11,22 @@
     
     <div class="mb-3">
         <label for="coleccion" class="form-label">Colección</label>
-        <select class="form-control" id="coleccion" name="coleccion" required>
-            <option value="">Seleccionar...</option>
-            <option value="Marvel's Spiderman">Marvel's Spiderman</option>
-            <option value="EVENTOS">EVENTOS</option>
-            <option value="Avatar">Avatar</option>
-        </select>
+        <input list="colecciones-list" class="form-control" id="coleccion" name="coleccion" required>
+        <datalist id="colecciones-list">
+            {% for coleccion in colecciones %}
+                <option value="{{ coleccion.nombre }}">
+            {% endfor %}
+        </datalist>
     </div>
     
     <div class="mb-3">
         <label for="fecha_salida" class="form-label">Fecha de Salida</label>
         <input type="date" class="form-control" id="fecha_salida" name="fecha_salida" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="fecha_envio" class="form-label">Fecha de Envío</label>
+        <input type="date" class="form-control" id="fecha_envio" name="fecha_envio">
     </div>
     
     <div class="mb-3">
@@ -50,6 +54,6 @@
     </div>
     
     <button type="submit" class="btn btn-success">Crear Lanzamiento</button>
-    <a href="/lanzamientos" class="btn btn-secondary">Cancelar</a>
+    <a href="{{ url_for('listar_lanzamientos') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 {% endblock %}

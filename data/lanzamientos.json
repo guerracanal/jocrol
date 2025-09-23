@@ -1,12 +1,13 @@
 [
   {
     "id": "5d16b9fa-11a4-48af-a29f-38566d56a691",
-    "nombre": "Cajas de sobres",
+    "nombre": "Caja de sobres",
     "coleccion": "Marvel's Spiderman",
     "fecha_salida": "2025-09-26",
     "precio": 195.0,
     "reserva": 20.0,
-    "tipo": "Cajas de sobres"
+    "tipo": "Cajas de sobres",
+    "fecha_envio": "2025-09-19"
   },
   {
     "id": "47cc7167-242a-4883-9332-a0b65b2ee36d",
@@ -15,7 +16,8 @@
     "fecha_salida": "2025-09-26",
     "precio": 70.0,
     "reserva": 5.0,
-    "tipo": "Bundle"
+    "tipo": "Bundle",
+    "fecha_envio": "2025-09-19"
   },
   {
     "id": "d01d36f2-d310-4afb-b680-44141b720384",
@@ -24,33 +26,107 @@
     "fecha_salida": "2025-09-26",
     "precio": 45.0,
     "reserva": 5.0,
-    "tipo": "Caja de escena"
-  },
-  {
-    "id": "553f5eb4-c240-4ce3-890b-7e72b7426215",
-    "nombre": "Comm Party 1",
-    "coleccion": "EVENTOS",
-    "fecha_salida": "2025-10-04",
-    "precio": 0.0,
-    "reserva": 0.0,
-    "tipo": "Evento"
-  },
-  {
-    "id": "54a9575e-8472-42df-b1a4-2dfc90d7f289",
-    "nombre": "Halloween Spiderman",
-    "coleccion": "EVENTOS",
-    "fecha_salida": "2025-10-31",
-    "precio": 0.0,
-    "reserva": 0.0,
-    "tipo": "Evento"
+    "tipo": "Caja de escena",
+    "fecha_envio": "2025-09-19"
   },
   {
     "id": "917fc125-222b-432c-92b1-bb4f0b4ac8b8",
-    "nombre": "Cajas de sobres",
+    "nombre": "Caja de sobres",
     "coleccion": "Avatar",
     "fecha_salida": "2025-11-21",
+    "fecha_envio": "2025-11-14",
     "precio": 195.0,
     "reserva": 20.0,
     "tipo": "Cajas de sobres"
+  },
+  {
+    "id": "prod-test-001",
+    "nombre": "Producto de Prueba",
+    "coleccion": "COLECCION DE PRUEBA",
+    "fecha_salida": "2025-09-25",
+    "fecha_envio": "2025-09-18",
+    "precio": 100.0,
+    "reserva": 20.0,
+    "tipo": "Producto"
+  },
+  {
+    "id": "8757a7bd-ab12-450b-97ca-ecab35310045",
+    "nombre": "caja",
+    "coleccion": "Marvel's Spiderman",
+    "fecha_salida": "2025-09-30",
+    "fecha_envio": "2025-09-24",
+    "precio": 30.0,
+    "reserva": 3.0,
+    "tipo": "Cajas de sobres"
+  },
+  {
+    "id": "f28a2a0d-0e4c-4e1b-8b1a-8b1b4b1e4b1a",
+    "nombre": "Caja de sobres Collector",
+    "coleccion": "Marvel's Spiderman",
+    "fecha_salida": "2025-09-26",
+    "precio": 430.0,
+    "reserva": 50.0,
+    "tipo": "Caja de sobres Collector",
+    "fecha_envio": "2025-09-16"
+  },
+  {
+    "id": "a8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1a",
+    "nombre": "Caja de sobres Jumpstart",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 140.0,
+    "reserva": 20.0,
+    "tipo": "Caja de sobres Jumpstart",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "b8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1b",
+    "nombre": "Bundle",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 70.0,
+    "reserva": 5.0,
+    "tipo": "Bundle",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "c8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1c",
+    "nombre": "Caja de escena (2 modelos)",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 45.0,
+    "reserva": 5.0,
+    "tipo": "Caja de escena",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "d8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1d",
+    "nombre": "Caja de sobres Collector",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 450.0,
+    "reserva": 50.0,
+    "tipo": "Caja de sobres Collector",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "e8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1e",
+    "nombre": "Commander's Bundle",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 100.0,
+    "reserva": 20.0,
+    "tipo": "Bundle",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "f8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1f",
+    "nombre": "Caja de principiante",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 30.0,
+    "reserva": 5.0,
+    "tipo": "Caja de principiante",
+    "fecha_envio": "2025-11-11"
   }
 ]

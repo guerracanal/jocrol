@@ -1,15 +1,132 @@
-<!-- templates/calendario.html -->
 {% extends "base.html" %}
 
+{% block title %}Calendario - Gestión de Lanzamientos{% endblock %}
+
 {% block content %}
-<h1>Calendario de Lanzamientos</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Calendario de Eventos</h1>
+</div>
 
 <div id="calendar"></div>
 
+<!-- Modal para detalles del evento -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">Detalles del Evento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 id="eventTitle"></h6>
+                <p><strong>Fecha Salida:</strong> <span id="eventDate"></span></p>
+                <div id="eventProps"></div>
+                <hr>
+                <div class="mb-3">
+                    <label for="staffSelector" class="form-label">Asignar recordatorio a:</label>
+                    <select class="form-select" id="staffSelector">
+                        <option value="" selected>Nadie (solo guardar)</option>
+                        {% for s in staff %}
+                        <option value="{{ s.id }}">{{ s.nombre }} ({{ s.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="createReminderBtn">Crear Recordatorio</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast para notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="reminderToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notificación</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
+    const calendarEl = document.getElementById('calendar');
+    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+    const reminderToastEl = document.getElementById('reminderToast');
+    const reminderToast = new bootstrap.Toast(reminderToastEl);
+    
+    const handleEventClick = (info) => {
+        const eventTitleEl = document.getElementById('eventTitle');
+        const eventDateEl = document.getElementById('eventDate');
+        const eventPropsEl = document.getElementById('eventProps');
+        const staffSelector = document.getElementById('staffSelector');
+        const createReminderBtn = document.getElementById('createReminderBtn');
+        const dateFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+
+        eventTitleEl.textContent = info.event.title;
+
+        if (info.event.start) {
+            eventDateEl.textContent = info.event.start.toLocaleDateString('es-ES', dateFormatOptions);
+        } else {
+            eventDateEl.textContent = 'Fecha no disponible';
+        }
+
+        let propsHtml = '';
+        if (info.event.extendedProps) {
+            const { precio, reserva, comentario, fecha_envio } = info.event.extendedProps;
+            
+            if (fecha_envio) {
+                const envioDate = new Date(fecha_envio + 'T00:00:00'); 
+                propsHtml += `<p><strong>Fecha Envío:</strong> ${envioDate.toLocaleDateString('es-ES', dateFormatOptions)}</p>`;
+            }
+            if (precio) propsHtml += `<p><strong>Precio:</strong> ${precio}€</p>`;
+            if (reserva) propsHtml += `<p><strong>Reserva:</strong> ${reserva}€</p>`;
+            if (comentario) propsHtml += `<p><strong>Comentario:</strong> ${comentario}</p>`;
+        }
+        eventPropsEl.innerHTML = propsHtml;
+
+        staffSelector.value = "";
+        createReminderBtn.onclick = () => {
+            if (!info.event.startStr) return;
+
+            const eventData = {
+                id: info.event.id,
+                title: info.event.title,
+                start: info.event.startStr.split('T')[0],
+                staff_id: staffSelector.value || null
+            };
+
+            fetch('/api/recordatorios/nuevo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData),
+            })
+            .then(res => res.json())
+            .then(data => {
+                const toastBody = reminderToastEl.querySelector('.toast-body');
+                toastBody.textContent = data.status === 'success' ? `✅ ${data.message}` : `❌ ${data.message}`;
+                reminderToast.show();
+                eventModal.hide();
+            })
+            .catch(error => {
+                const toastBody = reminderToastEl.querySelector('.toast-body');
+                toastBody.textContent = '❌ Error de red al crear el recordatorio.';
+                reminderToast.show();
+                console.error('Error:', error);
+            });
+        };
+
+        eventModal.show();
+    };
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'es',
         headerToolbar: {
@@ -18,12 +135,9 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,timeGridWeek,listWeek'
         },
         events: '/api/eventos',
-        eventClick: function(info) {
-            alert('Lanzamiento: ' + info.event.title + 
-                  '\nPrecio: ' + info.event.extendedProps.precio + '€' +
-                  '\nReserva: ' + info.event.extendedProps.reserva + '€');
-        }
+        eventClick: handleEventClick
     });
+
     calendar.render();
 });
 </script>

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "nombre": "Magic The Gathering",
+    "color": "#0d6efd"
+  },
+  {
+    "id": "f576049c-a53d-4576-a945-8b7a4e6da054",
+    "nombre": "EVENTOS",
+    "color": "#6f42c1"
+  },
+  {
+    "id": "964b09fb-27d6-4e8b-9d95-fe1fb07df65e",
+    "nombre": "Marvel's Spiderman",
+    "color": "#d63384"
+  },
+  {
+    "id": "5f77d167-47aa-43dd-afdb-37b47c8852dc",
+    "nombre": "Avatar",
+    "color": "#198754"
+  }
+]

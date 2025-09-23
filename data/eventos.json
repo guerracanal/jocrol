@@ -1,0 +1,32 @@
+[
+  {
+    "id": "553f5eb4-c240-4ce3-890b-7e72b7426215",
+    "nombre": "Comm Party 1",
+    "coleccion": "EVENTOS",
+    "fecha_salida": "2025-10-04",
+    "precio": 0.0,
+    "reserva": 0.0,
+    "tipo": "Evento",
+    "comentario": ""
+  },
+  {
+    "id": "54a9575e-8472-42df-b1a4-2dfc90d7f289",
+    "nombre": "Halloween Spiderman",
+    "coleccion": "EVENTOS",
+    "fecha_salida": "2025-10-31",
+    "precio": 0.0,
+    "reserva": 0.0,
+    "tipo": "Evento",
+    "comentario": ""
+  },
+  {
+    "id": "a2e7c7d8-2a2b-4e1a-8c1a-7b1a2b3c4d5e",
+    "nombre": "Comm Party 2",
+    "coleccion": "EVENTOS",
+    "fecha_salida": "2025-10-25",
+    "precio": 0.0,
+    "reserva": 0.0,
+    "tipo": "Evento",
+    "comentario": ""
+  }
+]
