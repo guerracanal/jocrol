@@ -1,0 +1,90 @@
+<!-- templates/nuevo_cliente.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Nuevo Cliente</h1>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="tel" class="form-control" id="telefono" name="telefono">
+    </div>
+    
+    <button type="submit" class="btn btn-success">Crear Cliente</button>
+    <a href="/clientes" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
+
+<!-- templates/reservas.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Reservas</h1>
+    <a href="/reservas/nueva" class="btn btn-success">Nueva Reserva</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Lanzamiento</th>
+                <th>Cantidad</th>
+                <th>Fecha Reserva</th>
+                <th>Estado</th>
+                <th>Pagado</th>
+                <th>Notas</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reserva in reservas %}
+            <tr>
+                <td>{{ reserva.cliente.nombre if reserva.cliente else 'Cliente no encontrado' }}</td>
+                <td>{{ reserva.lanzamiento.nombre if reserva.lanzamiento else 'Lanzamiento no encontrado' }}</td>
+                <td>{{ reserva.cantidad }}</td>
+                <td>{{ reserva.fecha_reserva }}</td>
+                <td>
+                    <span class="badge 
+                        {% if reserva.estado == 'pendiente' %}bg-warning
+                        {% elif reserva.estado == 'confirmada' %}bg-success
+                        {% elif reserva.estado == 'cancelada' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ reserva.estado.title() }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {% if reserva.pagado %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if reserva.pagado %}Sí{% else %}No{% endif %}
+                    </span>
+                </td>
+                <td>{{ reserva.notas or '-' }}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <form method="POST" action="/reservas/{{ reserva.id }}/estado" class="d-inline">
+                            <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="pendiente" {% if reserva.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="confirmada" {% if reserva.estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                                <option value="cancelada" {% if reserva.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                            </select>
+                        </form>
+                        <a href="/reservas/{{ reserva.id }}/editar" class="btn btn-sm btn-outline-primary ms-1">Editar</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

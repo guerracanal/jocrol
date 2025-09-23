@@ -1,0 +1,41 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Gestión de Lanzamientos Magic TCG</h1>
+        <p class="lead">Sistema para gestionar lanzamientos, clientes y reservas</p>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Lanzamientos</h5>
+                        <p class="card-text">Gestiona los próximos lanzamientos de cartas</p>
+                        <a href="/lanzamientos" class="btn btn-primary">Ver Lanzamientos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Clientes</h5>
+                        <p class="card-text">Administra la base de datos de clientes</p>
+                        <a href="/clientes" class="btn btn-primary">Ver Clientes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Reservas</h5>
+                        <p class="card-text">Gestiona las reservas de los clientes</p>
+                        <a href="/reservas" class="btn btn-primary">Ver Reservas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

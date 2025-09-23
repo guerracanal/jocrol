@@ -1,0 +1,30 @@
+<!-- templates/calendario.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Calendario de Lanzamientos</h1>
+
+<div id="calendar"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        events: '/api/eventos',
+        eventClick: function(info) {
+            alert('Lanzamiento: ' + info.event.title + 
+                  '\nPrecio: ' + info.event.extendedProps.precio + '€' +
+                  '\nReserva: ' + info.event.extendedProps.reserva + '€');
+        }
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}

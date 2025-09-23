@@ -1,0 +1,124 @@
+<!-- templates/clientes.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Clientes</h1>
+    <a href="/clientes/nuevo" class="btn btn-success">Nuevo Cliente</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Fecha de Registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary toggle-reservas-cliente" 
+                            data-cliente-id="{{ cliente.id }}"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#reservas-cliente-{{ cliente.id }}">
+                        ▶
+                    </button>
+                </td>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.fecha_registro }}</td>
+            </tr>
+            <tr class="collapse" id="reservas-cliente-{{ cliente.id }}">
+                <td colspan="5">
+                    <div class="p-3 bg-light">
+                        <h6>Reservas de {{ cliente.nombre }}</h6>
+                        <div class="reservas-container" id="reservas-cliente-content-{{ cliente.id }}">
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.toggle-reservas-cliente');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const clienteId = this.getAttribute('data-cliente-id');
+            const content = document.getElementById(`reservas-cliente-content-${clienteId}`);
+            
+            // Cambiar el icono
+            this.textContent = this.textContent === '▶' ? '▼' : '▶';
+            
+            // Cargar reservas si no están cargadas
+            if (content.innerHTML.includes('spinner-border')) {
+                fetch(`/api/clientes/${clienteId}/reservas`)
+                    .then(response => response.json())
+                    .then(reservas => {
+                        let html = '';
+                        if (reservas.length === 0) {
+                            html = '<p class="text-muted">Este cliente no tiene reservas</p>';
+                        } else {
+                            html = `
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-secondary">
+                                        <tr>
+                                            <th>Lanzamiento</th>
+                                            <th>Cantidad</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Pagado</th>
+                                            <th>Notas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+                            
+                            reservas.forEach(reserva => {
+                                const estadoBadge = reserva.estado === 'confirmada' ? 'bg-success' : 
+                                                  reserva.estado === 'cancelada' ? 'bg-danger' : 'bg-warning';
+                                const pagadoBadge = reserva.pagado ? 'bg-success' : 'bg-secondary';
+                                
+                                html += `
+                                    <tr>
+                                        <td>${reserva.lanzamiento ? reserva.lanzamiento.nombre : 'Lanzamiento no encontrado'}</td>
+                                        <td>${reserva.cantidad}</td>
+                                        <td>${reserva.fecha_reserva}</td>
+                                        <td><span class="badge ${estadoBadge}">${reserva.estado}</span></td>
+                                        <td><span class="badge ${pagadoBadge}">${reserva.pagado ? 'Sí' : 'No'}</span></td>
+                                        <td>${reserva.notas || '-'}</td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            html += `
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+                        content.innerHTML = html;
+                    })
+                    .catch(error => {
+                        content.innerHTML = '<p class="text-danger">Error al cargar las reservas</p>';
+                    });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

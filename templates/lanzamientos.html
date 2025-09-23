@@ -1,0 +1,142 @@
+<!-- templates/lanzamientos.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Lanzamientos</h1>
+    <a href="/lanzamientos/nuevo" class="btn btn-success">Nuevo Lanzamiento</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Colección</th>
+                <th>Fecha de Salida</th>
+                <th>Precio</th>
+                <th>Reserva</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lanzamiento in lanzamientos %}
+            <tr>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary toggle-reservas" 
+                            data-lanzamiento-id="{{ lanzamiento.id }}"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#reservas-{{ lanzamiento.id }}">
+                        ▶
+                    </button>
+                </td>
+                <td>{{ lanzamiento.nombre }}</td>
+                <td>
+                    <span class="badge 
+                        {% if lanzamiento.coleccion == 'Marvel\'s Spiderman' %}bg-danger
+                        {% elif lanzamiento.coleccion == 'EVENTOS' %}bg-warning
+                        {% elif lanzamiento.coleccion == 'Avatar' %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ lanzamiento.coleccion }}
+                    </span>
+                </td>
+                <td>{{ lanzamiento.fecha_salida }}</td>
+                <td>{{ lanzamiento.precio }}€</td>
+                <td>{{ lanzamiento.reserva }}€</td>
+                <td>{{ lanzamiento.tipo }}</td>
+                <td>
+                    <a href="/lanzamientos/{{ lanzamiento.id }}/eliminar" 
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+                </td>
+            </tr>
+            <tr class="collapse" id="reservas-{{ lanzamiento.id }}">
+                <td colspan="8">
+                    <div class="p-3 bg-light">
+                        <h6>Reservas para {{ lanzamiento.nombre }}</h6>
+                        <div class="reservas-container" id="reservas-content-{{ lanzamiento.id }}">
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.toggle-reservas');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const lanzamientoId = this.getAttribute('data-lanzamiento-id');
+            const content = document.getElementById(`reservas-content-${lanzamientoId}`);
+            
+            // Cambiar el icono
+            this.textContent = this.textContent === '▶' ? '▼' : '▶';
+            
+            // Cargar reservas si no están cargadas
+            if (content.innerHTML.includes('spinner-border')) {
+                fetch(`/api/lanzamientos/${lanzamientoId}/reservas`)
+                    .then(response => response.json())
+                    .then(reservas => {
+                        let html = '';
+                        if (reservas.length === 0) {
+                            html = '<p class="text-muted">No hay reservas para este lanzamiento</p>';
+                        } else {
+                            html = `
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-secondary">
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Cantidad</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Pagado</th>
+                                            <th>Notas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+                            
+                            reservas.forEach(reserva => {
+                                const estadoBadge = reserva.estado === 'confirmada' ? 'bg-success' : 
+                                                  reserva.estado === 'cancelada' ? 'bg-danger' : 'bg-warning';
+                                const pagadoBadge = reserva.pagado ? 'bg-success' : 'bg-secondary';
+                                
+                                html += `
+                                    <tr>
+                                        <td>${reserva.cliente ? reserva.cliente.nombre : 'Cliente no encontrado'}</td>
+                                        <td>${reserva.cantidad}</td>
+                                        <td>${reserva.fecha_reserva}</td>
+                                        <td><span class="badge ${estadoBadge}">${reserva.estado}</span></td>
+                                        <td><span class="badge ${pagadoBadge}">${reserva.pagado ? 'Sí' : 'No'}</span></td>
+                                        <td>${reserva.notas || '-'}</td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            html += `
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+                        content.innerHTML = html;
+                    })
+                    .catch(error => {
+                        content.innerHTML = '<p class="text-danger">Error al cargar las reservas</p>';
+                    });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
