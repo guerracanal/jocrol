@@ -1,0 +1,65 @@
+{
+    "juegos": {
+        "Magic": {
+            "color": "#D8A03D",
+            "colecciones": [
+                "Secret Lair",
+                "Edges of Eternities",
+                "Marvel's Spiderman",
+                "Avatar"
+            ]
+        },
+        "One Piece": {
+            "color": "#E24A4A",
+            "colecciones": [
+                "Extras",
+                "Starter Deck",
+                "EB03",
+                "OP12",
+                "OP14",
+                "OP13",
+                "PRB02"
+            ]
+        },
+        "Final Fantasy": {
+            "color": "#4A90E2",
+            "colecciones": [
+                "Starter Deck",
+                "Gunslinger in the Abyss"
+            ]
+        },
+        "Dragon Ball": {
+            "color": "#F5A623",
+            "colecciones": [
+                "FB07"
+            ]
+        },
+        "Digimon": {
+            "color": "#4A4AE2",
+            "colecciones": [
+                "BT24"
+            ]
+        },
+        "Lorcana": {
+            "color": "#7B64A3",
+            "colecciones": [
+                "Fabled"
+            ]
+        },
+        "Gundam": {
+            "color": "#C0C0C0",
+            "colecciones": [
+                "GD02",
+                "Starter Deck",
+                "GD03"
+            ]
+        },
+        "Riftbound": {
+            "color": "#50E3C2",
+            "colecciones": [
+                "Origins (Set One)",
+                "Starter Deck"
+            ]
+        }
+    }
+}

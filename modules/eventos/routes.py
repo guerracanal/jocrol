@@ -1,38 +1,22 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from modules.eventos.services import obtener_eventos_todos, obtener_evento_por_id, actualizar_evento, crear_evento
-from data.data_manager import cargar_datos, COLECCIONES_FILE
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from modules.eventos.services import (
+    obtener_eventos_filtrados,
+    obtener_evento_por_id, 
+    actualizar_evento, 
+    crear_evento,
+    eliminar_evento as eliminar_evento_servicio,
+    obtener_juegos_y_colecciones
+)
 
 eventos_bp = Blueprint('eventos', __name__, url_prefix='/eventos')
 
 @eventos_bp.route('/')
 def listar_eventos():
-    q = request.args.get('q', '').lower()
-    eventos_todos = obtener_eventos_todos()
-    colecciones = cargar_datos(COLECCIONES_FILE)
-    colecciones_map = {c['id']: c for c in colecciones if 'id' in c}
-
-    if q:
-        eventos_filtrados = [
-            e for e in eventos_todos if (
-                q in e.get('nombre', '').lower() or
-                q in e.get('coleccion', '').lower()
-            )
-        ]
-    else:
-        eventos_filtrados = eventos_todos
-
-    for evento in eventos_filtrados:
-        coleccion_id = evento.get('coleccion')
-        coleccion_data = colecciones_map.get(coleccion_id)
-        
-        # Asegurar que siempre haya un color válido
-        color = '#6c757d'  # Color gris por defecto
-        if coleccion_data and coleccion_data.get('color'):
-            color = coleccion_data.get('color')
-        evento['coleccion_color'] = color
-
-    filters = {'q': q}
-    return render_template('eventos/eventos.html', eventos=eventos_filtrados, filters=filters)
+    filters = {
+        'q': request.args.get('q', '')
+    }
+    eventos = obtener_eventos_filtrados(filters)
+    return render_template('eventos/eventos.html', eventos=eventos, filters=filters)
 
 
 @eventos_bp.route('/nuevo', methods=['GET', 'POST'])
@@ -42,7 +26,8 @@ def nuevo_evento():
         crear_evento(datos_evento)
         flash('Evento creado con éxito.', 'success')
         return redirect(url_for('eventos.listar_eventos'))
-    return render_template('eventos/nuevo_evento.html')
+    juegos_y_colecciones = obtener_juegos_y_colecciones()
+    return render_template('eventos/nuevo_evento.html', juegos_y_colecciones=juegos_y_colecciones)
 
 @eventos_bp.route('/editar/<evento_id>', methods=['GET', 'POST'])
 def editar_evento(evento_id):
@@ -57,14 +42,20 @@ def editar_evento(evento_id):
         flash('Evento actualizado con éxito.', 'success')
         return redirect(url_for('eventos.listar_eventos'))
 
-    return render_template('eventos/editar_evento.html', evento=evento)
+    juegos_y_colecciones = obtener_juegos_y_colecciones()
+    return render_template('eventos/editar_evento.html', evento=evento, juegos_y_colecciones=juegos_y_colecciones)
 
-@eventos_bp.route('/eliminar/<evento_id>')
+@eventos_bp.route('/eliminar/<evento_id>', methods=['POST'])
 def eliminar_evento(evento_id):
-    flash(f'Funcionalidad "Eliminar Evento {evento_id}" no implementada.', 'warning')
+    eliminar_evento_servicio(evento_id)
+    flash('Evento eliminado con éxito.', 'success')
     return redirect(url_for('eventos.listar_eventos'))
 
 @eventos_bp.route('/calendario')
 def calendario_eventos():
-    eventos = obtener_eventos_todos()
+    eventos = obtener_eventos_filtrados({})
     return render_template('eventos/calendario.html', eventos=eventos)
+
+@eventos_bp.route('/api/juegos_colecciones')
+def api_juegos_colecciones():
+    return jsonify(obtener_juegos_y_colecciones())

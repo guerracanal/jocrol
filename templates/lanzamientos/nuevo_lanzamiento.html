@@ -15,13 +15,19 @@
             <input type="text" class="form-control" id="nombre" name="nombre" required>
         </div>
         <div class="col-md-6">
-            <label for="coleccion" class="form-label">Colección</label>
-            <input class="form-control" list="colecciones-list" id="coleccion" name="coleccion" required>
-            <datalist id="colecciones-list">
-                {% for coleccion in colecciones %}
-                    <option value="{{ coleccion.nombre }}">
+            <label for="juego" class="form-label">Juego</label>
+            <select class="form-select" id="juego" name="juego" required>
+                <option value="">Selecciona un juego...</option>
+                {% for juego in juegos_y_colecciones.juegos.keys() %}
+                    <option value="{{ juego }}">{{ juego }}</option>
                 {% endfor %}
-            </datalist>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label for="coleccion" class="form-label">Colección</label>
+            <select class="form-select" id="coleccion" name="coleccion" required disabled>
+                <option value="">Selecciona una colección...</option>
+            </select>
         </div>
         <div class="col-md-6">
             <label for="fecha_salida" class="form-label">Fecha de Salida</p>
@@ -49,4 +55,32 @@
         <button type="submit" class="btn btn-primary">Añadir Lanzamiento</button>
     </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const juegosColecciones = {{ juegos_y_colecciones.juegos|tojson }};
+    const juegoSelect = document.getElementById('juego');
+    const coleccionSelect = document.getElementById('coleccion');
+
+    juegoSelect.addEventListener('change', function() {
+        const selectedJuego = this.value;
+        const colecciones = juegosColecciones[selectedJuego] || [];
+
+        // Clear previous options
+        coleccionSelect.innerHTML = '<option value="">Selecciona una colección...</option>';
+
+        if (selectedJuego) {
+            coleccionSelect.disabled = false;
+            colecciones.forEach(function(coleccion) {
+                const option = document.createElement('option');
+                option.value = coleccion;
+                option.textContent = coleccion;
+                coleccionSelect.appendChild(option);
+            });
+        } else {
+            coleccionSelect.disabled = true;
+        }
+    });
+</script>
 {% endblock %}

@@ -80,6 +80,20 @@
                        value="{{ reserva.pagado_cantidad or 0 }}">
             </div>
 
+            <div class="mb-3">
+                <label for="tipo_pago" class="form-label">Tipo de Pago</label>
+                <select class="form-control" id="tipo_pago" name="tipo_pago">
+                    <option value="Visa" {% if reserva.tipo_pago == 'Visa' %}selected{% endif %}>Visa</option>
+                    <option value="Efectivo" {% if reserva.tipo_pago == 'Efectivo' %}selected{% endif %}>Efectivo</option>
+                    <option value="Paygold" {% if reserva.tipo_pago == 'Paygold' %}selected{% endif %}>Paygold</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="3">{{ reserva.notas or '' }}</textarea>
+            </div>
+
             <div class="mb-3 p-3 border rounded bg-light">
                 <h5>Resumen de Pago</h5>
                 <p>Precio Unitario: <strong id="precio-unitario">0.00 €</strong></p>

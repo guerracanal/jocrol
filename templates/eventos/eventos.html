@@ -12,25 +12,11 @@
     <div class="card-body">
         <form method="GET" action="{{ url_for('eventos.listar_eventos') }}">
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-8">
                     <label for="q" class="form-label">Buscar</label>
-                    <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre o colección...">
+                    <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre, juego o colección...">
                 </div>
-                <div class="col-md-2">
-                    <label for="start_date" class="form-label">Desde</label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
-                </div>
-                <div class="col-md-2">
-                    <label for="end_date" class="form-label">Hasta</label>
-                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
-                </div>
-                <div class="col-md-2">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="hide_past" name="hide_past" {% if filters.hide_past == 'on' %}checked{% endif %}>
-                        <label class="form-check-label" for="hide_past">Ocultar pasados</label>
-                    </div>
-                </div>
-                <div class="col-md-2 d-flex">
+                <div class="col-md-4 d-flex">
                     <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i></button>
                     <a href="{{ url_for('eventos.listar_eventos') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
                 </div>
@@ -43,6 +29,7 @@
     <thead>
         <tr>
             <th>Nombre</th>
+            <th>Juego</th>
             <th>Colección</th>
             <th>Fecha</th>
             <th>Precio</th>
@@ -55,6 +42,7 @@
         {% for evento in eventos %}
         <tr>
             <td>{{ evento.nombre }}</td>
+            <td><span class="badge" style="background-color: {{ evento.juego_color }};">{{ evento.juego }}</span></td>
             <td>
                 <span class="badge" style="background-color: {{ evento.coleccion_color }};">
                     {{ evento.coleccion }}
@@ -66,14 +54,14 @@
             <td>{{ evento.comentario }}</td>
             <td>
                 <a href="{{ url_for('eventos.editar_evento', evento_id=evento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
-                <a href="{{ url_for('eventos.eliminar_evento', evento_id=evento.id) }}" 
-                    class="btn btn-outline-danger"
-                    onclick="return confirm('¿Estás seguro?')"><i class="bi bi-trash"></i></a>
+                <form action="{{ url_for('eventos.eliminar_evento', evento_id=evento.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este evento?');">
+                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
             </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="7" class="text-center">No hay eventos.</td>
+            <td colspan="8" class="text-center">No hay eventos.</td>
         </tr>
         {% endfor %}
     </tbody>

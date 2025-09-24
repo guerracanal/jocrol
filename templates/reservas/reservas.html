@@ -55,6 +55,8 @@
                         <th>Pago Completo</th>
                         <th>Cantidad Pagada</th>
                         <th class="text-danger">Pendiente</th>
+                        <th>Tipo de Pago</th>
+                        <th>Notas</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -98,6 +100,8 @@
                         </td>
                         <td>{{ "%.2f" | format(reserva.pagado_cantidad) }} €</td>
                         <td class="text-danger">{{ "%.2f" | format(reserva.pendiente) }} €</td>
+                        <td>{{ reserva.tipo_pago or 'N/A' }}</td>
+                        <td>{{ reserva.notas or 'N/A' }}</td>
                         <td>
                             <a href="{{ url_for('reservas.editar_reserva', reserva_id=reserva.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
                             <a href="{{ url_for('reservas.eliminar_reserva', reserva_id=reserva.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta reserva?');">

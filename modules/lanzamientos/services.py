@@ -1,11 +1,37 @@
-from data.data_manager import cargar_datos, guardar_datos, LANZAMIENTOS_FILE, RESERVAS_FILE, CLIENTES_FILE, COLECCIONES_FILE
+from data.data_manager import (
+    cargar_datos, 
+    guardar_datos, 
+    LANZAMIENTOS_FILE, 
+    RESERVAS_FILE, 
+    CLIENTES_FILE, 
+    cargar_juegos_colecciones
+)
 from collections import defaultdict
 from datetime import datetime
-import random
 import uuid
+
+def adjust_color_brightness(hex_color, factor):
+    """
+    Ajusta el brillo de un color hexadecimal.
+    Factor < 1 para oscurecer, > 1 para aclarar.
+    """
+    if not hex_color or not hex_color.startswith('#') or len(hex_color) != 7:
+        return hex_color
+    
+    try:
+        r, g, b = int(hex_color[1:3], 16), int(hex_color[3:5], 16), int(hex_color[5:7], 16)
+        r = int(max(0, min(255, r * factor)))
+        g = int(max(0, min(255, g * factor)))
+        b = int(max(0, min(255, b * factor)))
+        return f"#{r:02x}{g:02x}{b:02x}"
+    except (ValueError, TypeError):
+        return hex_color
 
 def generar_id():
     return str(uuid.uuid4())
+
+def obtener_juegos_y_colecciones():
+    return cargar_juegos_colecciones()
 
 def obtener_lanzamientos_todos():
     return cargar_datos(LANZAMIENTOS_FILE)
@@ -16,30 +42,38 @@ def obtener_reservas_todas():
 def obtener_clientes_todos():
     return cargar_datos(CLIENTES_FILE)
 
-def obtener_colecciones_todas():
-    return cargar_datos(COLECCIONES_FILE)
-
 def obtener_lanzamiento_por_id(lanzamiento_id):
-    lanzamientos = obtener_lanzamientos_todos()
-    for lanz in lanzamientos:
-        if lanz.get('id') == lanzamiento_id:
-            return lanz
-    return None
+    lanzamiento = next((l for l in obtener_lanzamientos_todos() if l.get('id') == lanzamiento_id), None)
+    if lanzamiento:
+        juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
+        juego_nombre = lanzamiento.get('juego')
+        if juego_nombre and juego_nombre in juegos_data:
+            lanzamiento['juego_color'] = juegos_data[juego_nombre].get('color', '#6c757d')
+        else:
+            lanzamiento['juego_color'] = '#6c757d'
+    return lanzamiento
 
 def obtener_lanzamientos_filtrados(filters):
     lanzamientos_todos = obtener_lanzamientos_todos()
     reservas = obtener_reservas_todas()
     clientes = {c['id']: c for c in obtener_clientes_todos()}
-    colecciones = {c['nombre']: c for c in obtener_colecciones_todas()}
+    juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
 
     lanzamientos_filtrados = lanzamientos_todos
 
-    if filters.get('q'):
-        q = filters['q'].lower()
+    q = filters.get('q')
+    if q:
+        q = q.lower()
         lanzamientos_filtrados = [
             l for l in lanzamientos_filtrados 
-            if q in l.get('nombre', '').lower() or q in l.get('coleccion', '').lower()
+            if q in l.get('nombre', '').lower() or \
+               q in l.get('coleccion', '').lower() or \
+               q in l.get('juego', '').lower()
         ]
+    
+    juego_filter = filters.get('juego')
+    if juego_filter:
+        lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('juego') == juego_filter]
 
     if filters.get('start_date'):
         lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('fecha_salida') >= filters['start_date']]
@@ -55,8 +89,7 @@ def obtener_lanzamientos_filtrados(filters):
     sort_order = filters.get('sort_order', 'asc')
     reverse = sort_order == 'desc'
     
-    # Handle missing values for sorting
-    lanzamientos_filtrados = sorted(lanzamientos_filtrados, key=lambda x: (x.get(sort_by) is None, x.get(sort_by, 0)), reverse=reverse)
+    lanzamientos_filtrados.sort(key=lambda x: (x.get(sort_by) is None, x.get(sort_by, 0)), reverse=reverse)
 
     reservas_por_lanzamiento = defaultdict(list)
     for res in reservas:
@@ -65,27 +98,37 @@ def obtener_lanzamientos_filtrados(filters):
 
     for lanz in lanzamientos_filtrados:
         lanz['reservas'] = reservas_por_lanzamiento.get(lanz.get('id'), [])
-        lanz['coleccion_data'] = colecciones.get(lanz.get('coleccion'))
+        juego_nombre = lanz.get('juego')
+        coleccion_nombre = lanz.get('coleccion')
+        
+        if juego_nombre and juego_nombre in juegos_data:
+            juego_info = juegos_data[juego_nombre]
+            juego_color = juego_info.get('color', '#6c757d')
+            lanz['juego_color'] = juego_color
+            
+            colecciones = juego_info.get('colecciones', [])
+            if coleccion_nombre and coleccion_nombre in colecciones:
+                try:
+                    idx = colecciones.index(coleccion_nombre)
+                    factor = 1 - ((idx + 1) * 0.1)
+                    lanz['coleccion_color'] = adjust_color_brightness(juego_color, factor)
+                except (ValueError, TypeError):
+                    lanz['coleccion_color'] = juego_color
+            else:
+                lanz['coleccion_color'] = juego_color
+        else:
+            lanz['juego_color'] = '#6c757d'
+            lanz['coleccion_color'] = '#6c757d'
 
-    return lanzamientos_filtrados, list(colecciones.values())
-
-def _crear_coleccion_si_no_existe(nombre_coleccion):
-    colecciones = obtener_colecciones_todas()
-    if not any(c['nombre'] == nombre_coleccion for c in colecciones):
-        nueva_coleccion = {
-            "nombre": nombre_coleccion,
-            "color": f'#{random.randint(0, 0xFFFFFF):06x}'
-        }
-        colecciones.append(nueva_coleccion)
-        guardar_datos(COLECCIONES_FILE, colecciones)
+    return lanzamientos_filtrados, juegos_data
 
 def crear_lanzamiento(datos_lanzamiento):
-    _crear_coleccion_si_no_existe(datos_lanzamiento.get('coleccion'))
     lanzamientos = obtener_lanzamientos_todos()
     nuevo_id = generar_id()
     lanzamiento = {
         "id": nuevo_id,
         "nombre": datos_lanzamiento.get('nombre'),
+        "juego": datos_lanzamiento.get('juego'),
         "coleccion": datos_lanzamiento.get('coleccion'),
         "fecha_salida": datos_lanzamiento.get('fecha_salida'),
         "fecha_envio": datos_lanzamiento.get('fecha_envio'),
@@ -97,13 +140,13 @@ def crear_lanzamiento(datos_lanzamiento):
     guardar_datos(LANZAMIENTOS_FILE, lanzamientos)
 
 def actualizar_lanzamiento(lanzamiento_id, datos_lanzamiento):
-    _crear_coleccion_si_no_existe(datos_lanzamiento.get('coleccion'))
     lanzamientos = obtener_lanzamientos_todos()
     for i, lanz in enumerate(lanzamientos):
         if lanz.get('id') == lanzamiento_id:
             lanzamientos[i] = {
                 "id": lanzamiento_id,
                 "nombre": datos_lanzamiento.get('nombre'),
+                "juego": datos_lanzamiento.get('juego'),
                 "coleccion": datos_lanzamiento.get('coleccion'),
                 "fecha_salida": datos_lanzamiento.get('fecha_salida'),
                 "fecha_envio": datos_lanzamiento.get('fecha_envio'),

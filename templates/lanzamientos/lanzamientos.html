@@ -14,9 +14,18 @@
             <input type="hidden" name="sort_by" value="{{ request.args.get('sort_by', '') }}">
             <input type="hidden" name="sort_order" value="{{ request.args.get('sort_order', '') }}">
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="q" class="form-label">Buscar</label>
                     <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre o colección...">
+                </div>
+                <div class="col-md-3">
+                    <label for="juego" class="form-label">Juego</label>
+                    <select class="form-select" id="juego" name="juego">
+                        <option value="">Todos</option>
+                        {% for juego in juegos.keys() %}
+                            <option value="{{ juego }}" {% if filters.juego == juego %}selected{% endif %}>{{ juego }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label for="start_date" class="form-label">Desde</label>
@@ -26,13 +35,11 @@
                     <label for="end_date" class="form-label">Hasta</label>
                     <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
                 </div>
-                <div class="col-md-2">
-                    <div class="form-check form-switch">
+                <div class="col-md-2 d-flex align-items-center">
+                    <div class="form-check form-switch me-3">
                         <input class="form-check-input" type="checkbox" id="hide_past" name="hide_past" {% if filters.hide_past == 'on' %}checked{% endif %}>
                         <label class="form-check-label" for="hide_past">Ocultar pasados</label>
                     </div>
-                </div>
-                <div class="col-md-2 d-flex">
                     <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i></button>
                     <a href="{{ url_for('lanzamientos.listar_lanzamientos') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
                 </div>
@@ -51,6 +58,13 @@
                     <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='nombre', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
                         Nombre
                         {% if request.args.get('sort_by') == 'nombre' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'juego' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='juego', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Juego
+                        {% if request.args.get('sort_by') == 'juego' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
                     </a>
                 </th>
                 <th>
@@ -103,11 +117,10 @@
                 </td>
                 <td>{{ lanzamiento.nombre }}</td>
                 <td>
-                    {% set color = lanzamiento.coleccion_data.color if lanzamiento.coleccion_data and lanzamiento.coleccion_data.color else '#6c757d' %}
-                    {% set style_attr = 'style="background-color: ' ~ color ~ ';"' %}
-                    <span class="badge" {{ style_attr|safe }}>
-                        {{ lanzamiento.coleccion }}
-                    </span>
+                    <span class="badge" style="background-color: {{ lanzamiento.juego_color }};">{{ lanzamiento.juego }}</span>
+                </td>
+                <td>
+                    <span class="badge" style="background-color: {{ lanzamiento.coleccion_color }};">{{ lanzamiento.coleccion }}</span>
                 </td>
                 <td>{{ lanzamiento.fecha_salida | formato_fecha }}</td>
                 <td>{{ lanzamiento.fecha_envio | formato_fecha or 'N/A' }}</td>
@@ -115,12 +128,14 @@
                 <td>{{ "%.2f"|format(lanzamiento.reserva) }}€</td>
                 <td>
                     <a href="{{ url_for('lanzamientos.editar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
-                    <a href="{{ url_for('lanzamientos.eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro?')"><i class="bi bi-trash"></i></a>
+                    <form action="{{ url_for('lanzamientos.eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este lanzamiento?');">
+                        <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
                 </td>
             </tr>
             {% if lanzamiento.reservas %}
             <tr class="{% if loop.index is odd %}table-light{% endif %}">
-                <td colspan="8" class="p-0">
+                <td colspan="9" class="p-0">
                     <div id="collapse-{{ lanzamiento.id }}" class="accordion-collapse collapse">
                         <div class="accordion-body bg-light p-3">
                             <h6 class="mb-2">Reservas para {{ lanzamiento.nombre }} ({{ lanzamiento.reservas|length }})</h6>
@@ -163,7 +178,7 @@
             {% endif %}
             {% else %}
             <tr>
-                <td colspan="8" class="text-center">No se encontraron lanzamientos.</td>
+                <td colspan="9" class="text-center">No se encontraron lanzamientos.</td>
             </tr>
             {% endfor %}
         </tbody>

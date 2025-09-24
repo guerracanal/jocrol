@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const handleEventClick = (info) => {
         const { title, start, extendedProps } = info.event;
         
-        document.getElementById('eventTitle').textContent = title;
+        document.getElementById('eventTitle').innerHTML = title; // Usamos innerHTML para renderizar el badge
         document.getElementById('eventDate').textContent = formatDate(start);
         
         const propsList = document.getElementById('eventProps');
@@ -88,14 +88,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let propsHtml = '';
         if (extendedProps) {
-            const { tipo, coleccion, color, precio, reserva, comentario, fecha_envio, fecha_salida } = extendedProps;
+            const { tipo, juego, coleccion, juego_color, coleccion_color, precio, reserva, comentario, fecha_envio, fecha_salida, fecha } = extendedProps;
             
-            propsHtml += createListItem('bi-tag-fill', 'Tipo', tipo);
-            if (coleccion) {
-                propsHtml += createListItem('bi-collection-fill', 'Colección', `<span class="badge" style="background-color: ${color}; color: ${getTextColorForBg(color)}">${coleccion}</span>`);
-            }
-            propsHtml += createListItem('bi-calendar-check', 'Fecha Salida', formatDate(fecha_salida));
-            propsHtml += createListItem('bi-calendar-check-fill', 'Fecha Envío', formatDate(fecha_envio));
+            if(tipo) propsHtml += createListItem('bi-tag-fill', 'Tipo', tipo);
+            if(juego) propsHtml += createListItem('bi-joystick', 'Juego', `<span class="badge" style="background-color: ${juego_color}; color: ${getTextColorForBg(juego_color)}">${juego}</span>`);
+            if(coleccion) propsHtml += createListItem('bi-collection-fill', 'Colección', `<span class="badge" style="background-color: ${coleccion_color}; color: ${getTextColorForBg(coleccion_color)}">${coleccion}</span>`);
+            if(fecha) propsHtml += createListItem('bi-calendar-check', 'Fecha', formatDate(fecha));
+            if(fecha_envio) propsHtml += createListItem('bi-calendar-check', 'Fecha Salida', formatDate(fecha_salida));
+            if(fecha_salida) propsHtml += createListItem('bi-calendar-check-fill', 'Fecha Envío', formatDate(fecha_envio));
             if (precio) propsHtml += createListItem('bi-currency-euro', 'Precio', `${precio}€`);
             if (reserva) propsHtml += createListItem('bi-coin', 'Reserva', `${reserva}€`);
             if (comentario) propsHtml += createListItem('bi-chat-left-text', 'Comentario', comentario);
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const createGoogleCalendarUrl = (event) => {
         if (!event.start) return null;
 
-        const title = encodeURIComponent(event.title);
+        const title = encodeURIComponent(event.extendedProps.nombre || event.title);
         const details = encodeURIComponent(
             Object.entries(event.extendedProps)
                 .map(([key, value]) => `${key}: ${value}`)
@@ -133,10 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.allDay) {
             endDate = new Date(startDate.getTime());
             endDate.setDate(startDate.getDate() + 1);
-            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toGoogleDate(startDate).substring(0,8)}/${toGoogleDate(endDate).substring(0,8)}&details=${details}`;
+            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toGoogleDate(endDate).substring(0,8)}/${toGoogleDate(endDate).substring(0,8)}&details=${details}`;
         } else {
             endDate = event.end ? new Date(event.end) : new Date(startDate.getTime() + 60 * 60 * 1000);
-            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toGoogleDate(startDate)}/${toGoogleDate(endDate)}&details=${details}`;
+            return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${toGoogleDate(endDate)}/${toGoogleDate(endDate)}&details=${details}`;
         }
     };
 
@@ -152,19 +152,14 @@ document.addEventListener('DOMContentLoaded', function() {
         events: '/api/eventos',
         eventClick: handleEventClick,
         eventDidMount: function(info) {
-            const { color } = info.event.extendedProps;
-            if (color) {
-                if (info.view.type === 'listWeek') {
-                    const dotEl = info.el.querySelector('.fc-list-event-dot');
-                    if (dotEl) {
-                        dotEl.style.backgroundColor = color;
-                    }
-                } else {
-                    info.el.style.backgroundColor = color;
-                    info.el.style.borderColor = color;
-                    info.el.style.color = getTextColorForBg(color);
-                }
+            const { coleccion_color, juego_color } = info.event.extendedProps;
+            const titleEl = info.el.querySelector('.fc-event-title');
+            if (titleEl) {
+                titleEl.innerHTML = info.event.title;
             }
+        },
+        eventContent: function(arg) {
+            return { html: arg.event.title };
         }
     });
 

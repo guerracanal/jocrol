@@ -9,7 +9,9 @@
     "fecha_reserva": "2025-09-24",
     "estado": "confirmada",
     "pagado": true,
-    "pagado_cantidad": 0.0
+    "pagado_cantidad": 0.0,
+    "tipo_pago": "Efectivo",
+    "notas": ""
   },
   {
     "id": "d7fb33df-12b5-4279-982c-7dfd56db7cc1",
@@ -21,6 +23,8 @@
     "fecha_reserva": "2025-09-24",
     "estado": "pendiente",
     "pagado": false,
-    "pagado_cantidad": 50.0
+    "pagado_cantidad": 50.0,
+    "tipo_pago": "Visa",
+    "notas": "Esta es una nota de prueba."
   }
 ]

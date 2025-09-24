@@ -37,7 +37,9 @@ def crear_reserva(datos_reserva):
         "fecha_reserva": datos_reserva.get('fecha_reserva') or datetime.now().strftime('%Y-%m-%d'),
         "estado": datos_reserva.get('estado', 'pendiente'),
         "pagado": 'pagado' in datos_reserva,
-        "pagado_cantidad": float(datos_reserva.get('pagado_cantidad') or 0)
+        "pagado_cantidad": float(datos_reserva.get('pagado_cantidad') or 0),
+        "tipo_pago": datos_reserva.get('tipo_pago'),
+        "notas": datos_reserva.get('notas')
     }
     reservas.append(reserva)
     guardar_datos(RESERVAS_FILE, reservas)
@@ -56,6 +58,8 @@ def actualizar_reserva(reserva_id, datos_reserva):
             reservas[i]['estado'] = datos_reserva.get('estado', r.get('estado'))
             reservas[i]['pagado'] = 'pagado' in datos_reserva
             reservas[i]['pagado_cantidad'] = float(datos_reserva.get('pagado_cantidad') or 0)
+            reservas[i]['tipo_pago'] = datos_reserva.get('tipo_pago')
+            reservas[i]['notas'] = datos_reserva.get('notas')
             reserva_actualizada = True
             break
     if not reserva_actualizada:

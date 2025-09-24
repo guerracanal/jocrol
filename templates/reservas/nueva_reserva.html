@@ -77,6 +77,20 @@
                 <input type="number" step="0.01" class="form-control" id="pagado_cantidad" name="pagado_cantidad" value="0.00">
             </div>
 
+            <div class="mb-3">
+                <label for="tipo_pago" class="form-label">Tipo de Pago</label>
+                <select class="form-control" id="tipo_pago" name="tipo_pago">
+                    <option value="Visa">Visa</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Paygold">Paygold</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
+            </div>
+
             <div class="mb-3 p-3 border rounded bg-light">
                 <h5>Resumen de Pago</h5>
                 <p>Precio Unitario: <strong id="precio-unitario">0.00 €</strong></p>
