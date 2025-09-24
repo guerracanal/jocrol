@@ -1,32 +1,26 @@
 [
   {
-    "id": "96bd518e-14c7-454d-acdc-45a1070e3be1",
-    "lanzamiento_id": "5d16b9fa-11a4-48af-a29f-38566d56a691",
-    "cliente_id": "f4dff966-ddc1-4263-b80f-2d97663e2cd9",
+    "id": "f4f5d9da-2eb2-4a92-b778-b145e2fc40e4",
+    "cliente_id": "7a5d749b-d52b-4dcb-9245-6bddad909bc6",
+    "tipo_reserva": "evento",
+    "lanzamiento_id": null,
+    "evento_id": "54a9575e-8472-42df-b1a4-2dfc90d7f289",
     "cantidad": 1,
-    "fecha_reserva": "2025-09-23",
+    "fecha_reserva": "2025-09-24",
+    "estado": "confirmada",
     "pagado": true,
-    "notas": "295 puntos de fidelidad aplicados",
-    "estado": "confirmada"
+    "pagado_cantidad": 0.0
   },
   {
-    "id": "49d07d90-bc7b-4dd4-a9bd-ce467c079c0e",
-    "lanzamiento_id": "47cc7167-242a-4883-9332-a0b65b2ee36d",
-    "cliente_id": "434be213-6a15-49a9-a9e0-114e42485b06",
-    "cantidad": 2,
-    "fecha_reserva": "2025-09-23",
-    "pagado": false,
-    "notas": "Pendiente de pago. Contactar esta semana.",
-    "estado": "pendiente"
-  },
-  {
-    "id": "52bd2cce-7b2d-4de3-88d4-7c44d20bc8af",
-    "lanzamiento_id": "917fc125-222b-432c-92b1-bb4f0b4ac8b8",
-    "cliente_id": "2786a9d8-d491-48c7-a1e5-074f80b8349c",
+    "id": "d7fb33df-12b5-4279-982c-7dfd56db7cc1",
+    "cliente_id": "7a5d749b-d52b-4dcb-9245-6bddad909bc6",
+    "tipo_reserva": "lanzamiento",
+    "lanzamiento_id": "f28a2a0d-0e4c-4e1b-8b1a-8b1b4b1e4b1a",
+    "evento_id": null,
     "cantidad": 1,
-    "fecha_reserva": "2025-09-23",
+    "fecha_reserva": "2025-09-24",
+    "estado": "pendiente",
     "pagado": false,
-    "notas": "",
-    "estado": "pendiente"
+    "pagado_cantidad": 50.0
   }
 ]

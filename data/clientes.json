@@ -1,23 +1,8 @@
 [
   {
-    "id": "f4dff966-ddc1-4263-b80f-2d97663e2cd9",
-    "nombre": "Juan Pérez",
-    "email": "juan@email.com",
-    "telefono": "666777888",
-    "fecha_registro": "2025-09-23 20:40:43"
-  },
-  {
-    "id": "434be213-6a15-49a9-a9e0-114e42485b06",
-    "nombre": "María García",
-    "email": "maria@email.com",
-    "telefono": "666111222",
-    "fecha_registro": "2025-09-23 20:40:43"
-  },
-  {
-    "id": "2786a9d8-d491-48c7-a1e5-074f80b8349c",
-    "nombre": "Carlos López",
-    "email": "carlos@email.com",
-    "telefono": "666333444",
-    "fecha_registro": "2025-09-23 20:40:43"
+    "id": "7a5d749b-d52b-4dcb-9245-6bddad909bc6",
+    "nombre": "Cipomikanico",
+    "email": "cipomikanico@gmail.com",
+    "telefono": ""
   }
 ]

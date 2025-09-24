@@ -4,10 +4,10 @@
     "nombre": "Caja de sobres",
     "coleccion": "Marvel's Spiderman",
     "fecha_salida": "2025-09-26",
+    "fecha_envio": "2025-09-19",
     "precio": 195.0,
     "reserva": 20.0,
-    "tipo": "Cajas de sobres",
-    "fecha_envio": "2025-09-19"
+    "comentario": ""
   },
   {
     "id": "47cc7167-242a-4883-9332-a0b65b2ee36d",
@@ -38,16 +38,6 @@
     "precio": 195.0,
     "reserva": 20.0,
     "tipo": "Cajas de sobres"
-  },
-  {
-    "id": "prod-test-001",
-    "nombre": "Producto de Prueba",
-    "coleccion": "COLECCION DE PRUEBA",
-    "fecha_salida": "2025-09-25",
-    "fecha_envio": "2025-09-18",
-    "precio": 100.0,
-    "reserva": 20.0,
-    "tipo": "Producto"
   },
   {
     "id": "8757a7bd-ab12-450b-97ca-ecab35310045",

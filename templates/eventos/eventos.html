@@ -5,12 +5,12 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Eventos</h1>
-    <a href="{{ url_for('nuevo_evento') }}" class="btn btn-success">Añadir Evento</a>
+    <a href="{{ url_for('eventos.nuevo_evento') }}" class="btn btn-success"><i class="bi bi-calendar-plus me-1"></i>Añadir Evento</a>
 </div>
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" action="{{ url_for('listar_eventos') }}">
+        <form method="GET" action="{{ url_for('eventos.listar_eventos') }}">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <label for="q" class="form-label">Buscar</label>
@@ -31,8 +31,8 @@
                     </div>
                 </div>
                 <div class="col-md-2 d-flex">
-                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a href="{{ url_for('listar_eventos') }}" class="btn btn-secondary">Limpiar</a>
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i></button>
+                    <a href="{{ url_for('eventos.listar_eventos') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
                 </div>
             </div>
         </form>
@@ -56,7 +56,7 @@
         <tr>
             <td>{{ evento.nombre }}</td>
             <td>
-                <span class="badge" style="background-color: {{ evento.coleccion_data.color if evento.coleccion_data and evento.coleccion_data.color else '#6c757d' }} !important;">
+                <span class="badge" style="background-color: {{ evento.coleccion_color }};">
                     {{ evento.coleccion }}
                 </span>
             </td>
@@ -65,7 +65,10 @@
             <td>{{ "%.2f"|format(evento.reserva) }}€</td>
             <td>{{ evento.comentario }}</td>
             <td>
-                <a href="{{ url_for('eliminar_evento', evento_id=evento.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
+                <a href="{{ url_for('eventos.editar_evento', evento_id=evento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
+                <a href="{{ url_for('eventos.eliminar_evento', evento_id=evento.id) }}" 
+                    class="btn btn-outline-danger"
+                    onclick="return confirm('¿Estás seguro?')"><i class="bi bi-trash"></i></a>
             </td>
         </tr>
         {% else %}

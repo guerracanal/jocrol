@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Editar Reserva</h1>
+<form method="POST">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="cliente_id" class="form-label">Cliente</label>
+                <select class="form-control" id="cliente_id" name="cliente_id" required>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}" {% if cliente.id == reserva.cliente_id %}selected{% endif %}>
+                        {{ cliente.nombre }} ({{ cliente.email }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo_reserva" class="form-label">Tipo de Reserva</label>
+                <select class="form-control" id="tipo_reserva" name="tipo_reserva">
+                    <option value="lanzamiento" {% if reserva.tipo_reserva == 'lanzamiento' %}selected{% endif %}>Lanzamiento</option>
+                    <option value="evento" {% if reserva.tipo_reserva == 'evento' %}selected{% endif %}>Evento</option>
+                </select>
+            </div>
+            
+            <div class="mb-3" id="lanzamiento-group">
+                <label for="lanzamiento_id" class="form-label">Lanzamiento</label>
+                <select class="form-control" id="lanzamiento_id" name="lanzamiento_id">
+                    {% for lanzamiento in lanzamientos %}
+                    <option value="{{ lanzamiento.id }}" 
+                            data-precio="{{ lanzamiento.precio or 0 }}" 
+                            data-reserva="{{ lanzamiento.reserva or 0 }}"
+                            {% if lanzamiento.id == reserva.lanzamiento_id %}selected{% endif %}>
+                        {{ lanzamiento.nombre }} - {{ lanzamiento.coleccion }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3 d-none" id="evento-group">
+                <label for="evento_id" class="form-label">Evento</label>
+                <select class="form-control" id="evento_id" name="evento_id">
+                    {% for evento in eventos %}
+                    <option value="{{ evento.id }}" 
+                            data-precio="{{ evento.precio or 0 }}" 
+                            data-reserva="{{ evento.reserva or 0 }}"
+                            {% if evento.id == reserva.evento_id %}selected{% endif %}>
+                        {{ evento.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="cantidad" class="form-label">Cantidad</label>
+                <input type="number" min="1" class="form-control" id="cantidad" name="cantidad" 
+                       value="{{ reserva.cantidad }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="fecha_reserva" class="form-label">Fecha de Reserva</label>
+                <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" 
+                       value="{{ reserva.fecha_reserva }}">
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-control" id="estado" name="estado">
+                    <option value="pendiente" {% if reserva.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="confirmada" {% if reserva.estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                    <option value="cancelada" {% if reserva.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="pagado_cantidad" class="form-label">Cantidad Pagada (€)</label>
+                <input type="number" step="0.01" class="form-control" id="pagado_cantidad" name="pagado_cantidad" 
+                       value="{{ reserva.pagado_cantidad or 0 }}">
+            </div>
+
+            <div class="mb-3 p-3 border rounded bg-light">
+                <h5>Resumen de Pago</h5>
+                <p>Precio Unitario: <strong id="precio-unitario">0.00 €</strong></p>
+                <p>Importe Total: <strong id="total-reserva">0.00 €</strong></p>
+                <p>Importe Pendiente: <strong id="pendiente-reserva" class="text-danger">0.00 €</strong></p>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="pagado" name="pagado" 
+                       {% if reserva.pagado %}checked{% endif %}>
+                <label class="form-check-label" for="pagado">Reserva Completamente Pagada</label>
+            </div>
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Actualizar Reserva</button>
+    <a href="{{ url_for('reservas.listar_reservas') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipoReservaSelect = document.getElementById('tipo_reserva');
+    const lanzamientoGroup = document.getElementById('lanzamiento-group');
+    const eventoGroup = document.getElementById('evento-group');
+    const lanzamientoSelect = document.getElementById('lanzamiento_id');
+    const eventoSelect = document.getElementById('evento_id');
+    const cantidadInput = document.getElementById('cantidad');
+    const pagadoInput = document.getElementById('pagado_cantidad');
+
+    const precioUnitarioElem = document.getElementById('precio-unitario');
+    const totalReservaElem = document.getElementById('total-reserva');
+    const pendienteReservaElem = document.getElementById('pendiente-reserva');
+
+    function toggleReservaFields() {
+        if (tipoReservaSelect.value === 'lanzamiento') {
+            lanzamientoGroup.classList.remove('d-none');
+            eventoGroup.classList.add('d-none');
+        } else {
+            lanzamientoGroup.classList.add('d-none');
+            eventoGroup.classList.remove('d-none');
+        }
+        calcularTotales();
+    }
+
+    function calcularTotales() {
+        let selectedOption;
+        if (tipoReservaSelect.value === 'lanzamiento') {
+            selectedOption = lanzamientoSelect.options[lanzamientoSelect.selectedIndex];
+        } else {
+            selectedOption = eventoSelect.options[eventoSelect.selectedIndex];
+        }
+
+        const precioUnitario = parseFloat(selectedOption.dataset.precio) || 0;
+        const cantidad = parseInt(cantidadInput.value) || 1;
+        const pagado = parseFloat(pagadoInput.value) || 0;
+
+        const totalReserva = precioUnitario * cantidad;
+        const pendiente = totalReserva - pagado;
+
+        precioUnitarioElem.textContent = precioUnitario.toFixed(2) + ' €';
+        totalReservaElem.textContent = totalReserva.toFixed(2) + ' €';
+        pendienteReservaElem.textContent = pendiente.toFixed(2) + ' €';
+        
+        if (pendiente <= 0) {
+            pendienteReservaElem.classList.remove('text-danger');
+            pendienteReservaElem.classList.add('text-success');
+        } else {
+            pendienteReservaElem.classList.add('text-danger');
+            pendienteReservaElem.classList.remove('text-success');
+        }
+    }
+
+    tipoReservaSelect.addEventListener('change', toggleReservaFields);
+    lanzamientoSelect.addEventListener('change', calcularTotales);
+    eventoSelect.addEventListener('change', calcularTotales);
+    cantidadInput.addEventListener('input', calcularTotales);
+    pagadoInput.addEventListener('input', calcularTotales);
+
+    // Initial setup
+    toggleReservaFields();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Cliente - Gestión de Lanzamientos{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Añadir Nuevo Cliente</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('clientes.nuevo_cliente') }}" novalidate>
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ form_data.get('nombre', '') }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ form_data.get('email', '') }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ form_data.get('telefono', '') }}">
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{{ url_for('clientes.listar_clientes') }}" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-lg me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Guardar Cliente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

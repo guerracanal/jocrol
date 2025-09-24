@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Lanzamientos - Gestión de Lanzamientos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Lanzamientos</h1>
+    <a href="{{ url_for('lanzamientos.nuevo_lanzamiento') }}" class="btn btn-success"><i class="bi bi-calendar-plus me-1"></i>Añadir Lanzamiento</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('lanzamientos.listar_lanzamientos') }}">
+            <input type="hidden" name="sort_by" value="{{ request.args.get('sort_by', '') }}">
+            <input type="hidden" name="sort_order" value="{{ request.args.get('sort_order', '') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="q" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="q" name="q" value="{{ filters.q or '' }}" placeholder="Nombre o colección...">
+                </div>
+                <div class="col-md-2">
+                    <label for="start_date" class="form-label">Desde</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ filters.start_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="end_date" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ filters.end_date or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="hide_past" name="hide_past" {% if filters.hide_past == 'on' %}checked{% endif %}>
+                        <label class="form-check-label" for="hide_past">Ocultar pasados</label>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i></button>
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th style="width: 2rem;"></th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'nombre' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='nombre', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Nombre
+                        {% if request.args.get('sort_by') == 'nombre' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'coleccion' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='coleccion', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Colección
+                        {% if request.args.get('sort_by') == 'coleccion' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'fecha_salida' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='fecha_salida', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Fecha de Salida
+                        {% if request.args.get('sort_by') == 'fecha_salida' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'fecha_envio' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='fecha_envio', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Fecha de Envío
+                        {% if request.args.get('sort_by') == 'fecha_envio' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'precio' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='precio', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Precio
+                        {% if request.args.get('sort_by') == 'precio' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'reserva' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='reserva', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                        Reserva
+                        {% if request.args.get('sort_by') == 'reserva' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                    </a>
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody class="accordion">
+            {% for lanzamiento in lanzamientos %}
+            <tr class="accordion-header {% if loop.index is odd %}table-light{% endif %}">
+                <td>
+                    {% if lanzamiento.reservas %}
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ lanzamiento.id }}" aria-expanded="false" aria-controls="collapse-{{ lanzamiento.id }}">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    {% endif %}
+                </td>
+                <td>{{ lanzamiento.nombre }}</td>
+                <td>
+                    {% set color = lanzamiento.coleccion_data.color if lanzamiento.coleccion_data and lanzamiento.coleccion_data.color else '#6c757d' %}
+                    {% set style_attr = 'style="background-color: ' ~ color ~ ';"' %}
+                    <span class="badge" {{ style_attr|safe }}>
+                        {{ lanzamiento.coleccion }}
+                    </span>
+                </td>
+                <td>{{ lanzamiento.fecha_salida | formato_fecha }}</td>
+                <td>{{ lanzamiento.fecha_envio | formato_fecha or 'N/A' }}</td>
+                <td>{{ "%.2f"|format(lanzamiento.precio) }}€</td>
+                <td>{{ "%.2f"|format(lanzamiento.reserva) }}€</td>
+                <td>
+                    <a href="{{ url_for('lanzamientos.editar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
+                    <a href="{{ url_for('lanzamientos.eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro?')"><i class="bi bi-trash"></i></a>
+                </td>
+            </tr>
+            {% if lanzamiento.reservas %}
+            <tr class="{% if loop.index is odd %}table-light{% endif %}">
+                <td colspan="8" class="p-0">
+                    <div id="collapse-{{ lanzamiento.id }}" class="accordion-collapse collapse">
+                        <div class="accordion-body bg-light p-3">
+                            <h6 class="mb-2">Reservas para {{ lanzamiento.nombre }} ({{ lanzamiento.reservas|length }})</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Cantidad</th>
+                                        <th>Fecha Reserva</th>
+                                        <th>Estado</th>
+                                        <th>Pagado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in lanzamiento.reservas %}
+                                    <tr>
+                                        <td>{{ res.cliente.nombre if res.cliente else 'Cliente Eliminado' }}</td>
+                                        <td>{{ res.cantidad }}</td>
+                                        <td>{{ res.fecha_reserva | formato_fecha }}</td>
+                                        <td>
+                                            <span class="badge {% if res.estado == 'pendiente' %}bg-warning{% elif res.estado == 'confirmada' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ res.estado.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if res.pagado %}
+                                                <span class="badge bg-success">Sí</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">No</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endif %}
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No se encontraron lanzamientos.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

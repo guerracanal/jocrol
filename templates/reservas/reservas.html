@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Reservas</h1>
+    <a href="{{ url_for('reservas.nueva_reserva') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i> Añadir Reserva
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Filtros</h5>
+        <form method="GET" action="{{ url_for('reservas.listar_reservas') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por cliente o producto..." value="{{ filters.q or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="start_date" class="form-control" value="{{ filters.start_date or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="end_date" class="form-control" value="{{ filters.end_date or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="payment_status" class="form-select">
+                        <option value="">Estado de Pago</option>
+                        <option value="pagado" {% if filters.payment_status == 'pagado' %}selected{% endif %}>Pagado</option>
+                        <option value="pendiente" {% if filters.payment_status == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i></button>
+                    <a href="{{ url_for('reservas.listar_reservas') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Total Pendiente: <span class="text-danger">{{ "%.2f" | format(total_pendiente) }} €</span></h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Lanzamiento/Evento</th>
+                        <th>Fecha Envío/Evento</th>
+                        <th>Cantidad</th>
+                        <th>Fecha Reserva</th>
+                        <th>Estado</th>
+                        <th>Pago Completo</th>
+                        <th>Cantidad Pagada</th>
+                        <th class="text-danger">Pendiente</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.cliente.nombre if reserva.cliente else 'N/A' }}</td>
+                        <td>{{ reserva.item.nombre if reserva.item else 'N/A' }}</td>
+                        <td>
+                            {% if reserva.item %}
+                                {% if reserva.item.fecha_salida %}
+                                    {{ reserva.item.fecha_salida | formato_fecha }}
+                                {% elif reserva.item.fecha_envio %}
+                                    {{ reserva.item.fecha_envio | formato_fecha }}
+                                {% elif reserva.item.fecha %}
+                                    {{ reserva.item.fecha | formato_fecha }}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ reserva.cantidad }}</td>
+                        <td>{{ reserva.fecha_reserva | formato_fecha }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if reserva.estado == 'pendiente' %}bg-warning
+                                {% elif reserva.estado == 'confirmada' %}bg-success
+                                {% elif reserva.estado == 'cancelada' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ reserva.estado | title }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if reserva.pagado %}
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ "%.2f" | format(reserva.pagado_cantidad) }} €</td>
+                        <td class="text-danger">{{ "%.2f" | format(reserva.pendiente) }} €</td>
+                        <td>
+                            <a href="{{ url_for('reservas.editar_reserva', reserva_id=reserva.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
+                            <a href="{{ url_for('reservas.eliminar_reserva', reserva_id=reserva.id) }}" class="btn btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta reserva?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
