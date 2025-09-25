@@ -30,6 +30,32 @@
             </select>
         </div>
         <div class="col-md-6">
+            <label for="tipo" class="form-label">Tipo</label>
+            <select class="form-select" id="tipo" name="tipo" required>
+                <option value="">Selecciona un tipo...</option>
+                <option value="Caja de sobres">Caja de sobres</option>
+                <option value="Bundle">Bundle</option>
+                <option value="Caja de escena">Caja de escena</option>
+                <option value="Caja de sobres Collector">Caja de sobres Collector</option>
+                <option value="Secret Lair">Secret Lair</option>
+                <option value="Mazos de commander">Mazos de commander</option>
+                <option value="Gift Bundle">Gift Bundle</option>
+                <option value="Caja de principiante">Caja de principiante</option>
+                <option value="Commander's Bundle">Commander's Bundle</option>
+                <option value="Caja de sobres Jumpstart">Caja de sobres Jumpstart</option>
+                <option value="Extras">Extras</option>
+                <option value="Starter Deck">Starter Deck</option>
+                <option value="Case">Case</option>
+                <option value="Double Pack">Double Pack</option>
+                <option value="Tin Pack">Tin Pack</option>
+                <option value="Mazos de inicio">Mazos de inicio</option>
+                <option value="Illuminer's Trove">Illuminer's Trove</option>
+                <option value="Collector Starter">Collector Starter</option>
+                <option value="Gift Set">Gift Set</option>
+                <option value="Proving Grounds">Proving Grounds</option>
+            </select>
+        </div>
+        <div class="col-md-6">
             <label for="fecha_salida" class="form-label">Fecha de Salida</p>
             <input type="date" class="form-control" id="fecha_salida" name="fecha_salida" required>
         </div>
@@ -65,12 +91,12 @@
 
     juegoSelect.addEventListener('change', function() {
         const selectedJuego = this.value;
-        const colecciones = juegosColecciones[selectedJuego] || [];
+        const colecciones = selectedJuego && juegosColecciones[selectedJuego] ? juegosColecciones[selectedJuego].colecciones : [];
 
         // Clear previous options
         coleccionSelect.innerHTML = '<option value="">Selecciona una colección...</option>';
 
-        if (selectedJuego) {
+        if (selectedJuego && colecciones) {
             coleccionSelect.disabled = false;
             colecciones.forEach(function(coleccion) {
                 const option = document.createElement('option');

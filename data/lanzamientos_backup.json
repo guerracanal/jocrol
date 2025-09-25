@@ -8,7 +8,6 @@
     "fecha_envio": "2025-09-19",
     "precio": 195.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "comentario": ""
   },
   {
@@ -34,6 +33,28 @@
     "fecha_envio": "2025-09-19"
   },
   {
+    "id": "917fc125-222b-432c-92b1-bb4f0b4ac8b8",
+    "nombre": "Caja de sobres",
+    "juego": "Magic",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "fecha_envio": "2025-11-14",
+    "precio": 195.0,
+    "reserva": 20.0,
+    "tipo": "Cajas de sobres"
+  },
+  {
+    "id": "8757a7bd-ab12-450b-97ca-ecab35310045",
+    "nombre": "caja",
+    "juego": "Magic",
+    "coleccion": "Marvel's Spiderman",
+    "fecha_salida": "2025-09-30",
+    "fecha_envio": "2025-09-24",
+    "precio": 30.0,
+    "reserva": 3.0,
+    "tipo": "Cajas de sobres"
+  },
+  {
     "id": "f28a2a0d-0e4c-4e1b-8b1a-8b1b4b1e4b1a",
     "nombre": "Caja de sobres Collector",
     "juego": "Magic",
@@ -45,120 +66,14 @@
     "fecha_envio": "2025-09-16"
   },
   {
-    "id": "300859f6-b202-4b4e-abbe-21e822919055",
-    "nombre": "Secret Lair: Sonic Friends & Foes",
-    "coleccion": "Secret Lair",
-    "fecha_salida": "2025-09-12",
+    "id": "a8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1a",
+    "nombre": "Caja de sobres Jumpstart",
     "juego": "Magic",
-    "precio": 55.0,
-    "reserva": 5.0,
-    "tipo": "Secret Lair",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "ccf11669-658b-4988-bd78-079029562df1",
-    "nombre": "Caja de sobres",
-    "coleccion": "Edges of Eternities",
-    "fecha_salida": "2025-08-01",
-    "juego": "Magic",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
     "precio": 140.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "56b6238f-aaed-4a86-b8df-c1fa02aea7db",
-    "nombre": "Bundle",
-    "coleccion": "Edges of Eternities",
-    "fecha_salida": "2025-08-01",
-    "juego": "Magic",
-    "precio": 55.0,
-    "reserva": 5.0,
-    "tipo": "Bundle",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "ee39576d-5a4f-40c4-ade2-cd162efa7194",
-    "nombre": "Caja de sobres Collector",
-    "coleccion": "Edges of Eternities",
-    "fecha_salida": "2025-08-01",
-    "juego": "Magic",
-    "precio": 275.0,
-    "reserva": 20.0,
-    "tipo": "Caja de sobres Collector",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "7efc6139-fff7-4c18-b5c3-29b1454fce1b",
-    "nombre": "Mazos de commander",
-    "coleccion": "Edges of Eternities",
-    "fecha_salida": "2025-08-01",
-    "juego": "Magic",
-    "precio": 45.0,
-    "reserva": 5.0,
-    "tipo": "Mazos de commander",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "f9c18588-a0a6-4aa1-89e3-5b8485843499",
-    "nombre": "Gift Bundle",
-    "coleccion": "Marvel's Spiderman",
-    "fecha_salida": null,
-    "juego": "Magic",
-    "precio": 85.0,
-    "reserva": 5.0,
-    "tipo": "Gift Bundle",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "d8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1d",
-    "nombre": "Caja de sobres Collector",
-    "juego": "Magic",
-    "coleccion": "Avatar",
-    "fecha_salida": "2025-11-21",
-    "precio": 450.0,
-    "reserva": 50.0,
-    "tipo": "Caja de sobres Collector",
-    "fecha_envio": "2025-11-11"
-  },
-  {
-    "id": "f8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1f",
-    "nombre": "Caja de principiante",
-    "juego": "Magic",
-    "coleccion": "Avatar",
-    "fecha_salida": "2025-11-21",
-    "precio": 30.0,
-    "reserva": 5.0,
-    "tipo": "Caja de principiante",
-    "fecha_envio": "2025-11-11"
-  },
-  {
-    "id": "76c443f8-e800-4cee-9650-88e15e1a32d2",
-    "nombre": "Commander's Bundle",
-    "coleccion": "Avatar",
-    "fecha_salida": "2025-11-21",
-    "juego": "Magic",
-    "precio": 100.0,
-    "reserva": 20.0,
-    "tipo": "Commander's Bundle",
-    "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "c8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1c",
-    "nombre": "Caja de escena (2 modelos)",
-    "juego": "Magic",
-    "coleccion": "Avatar",
-    "fecha_salida": "2025-11-21",
-    "precio": 45.0,
-    "reserva": 5.0,
-    "tipo": "Caja de escena",
+    "tipo": "Caja de sobres Jumpstart",
     "fecha_envio": "2025-11-11"
   },
   {
@@ -173,15 +88,136 @@
     "fecha_envio": "2025-11-11"
   },
   {
-    "id": "a8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1a",
-    "nombre": "Caja de sobres Jumpstart",
+    "id": "c8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1c",
+    "nombre": "Caja de escena (2 modelos)",
     "juego": "Magic",
     "coleccion": "Avatar",
     "fecha_salida": "2025-11-21",
+    "precio": 45.0,
+    "reserva": 5.0,
+    "tipo": "Caja de escena",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "d8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1d",
+    "nombre": "Caja de sobres Collector",
+    "juego": "Magic",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 450.0,
+    "reserva": 50.0,
+    "tipo": "Caja de sobres Collector",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "e8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1e",
+    "nombre": "Commander's Bundle",
+    "juego": "Magic",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 100.0,
+    "reserva": 20.0,
+    "tipo": "Bundle",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "f8f3b6a3-0a4b-4b2a-9e1b-8b1b4b1e4b1f",
+    "nombre": "Caja de principiante",
+    "juego": "Magic",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "precio": 30.0,
+    "reserva": 5.0,
+    "tipo": "Caja de principiante",
+    "fecha_envio": "2025-11-11"
+  },
+  {
+    "id": "300859f6-b202-4b4e-abbe-21e822919055",
+    "nombre": "Secret Lair: Sonic Friends & Foes",
+    "coleccion": "Secret Lair",
+    "fecha_salida": "2025-09-12",
+    "juego": "Magic",
+    "precio": 55.0,
+    "reserva": 5.0,
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "ccf11669-658b-4988-bd78-079029562df1",
+    "nombre": "Caja de sobres",
+    "coleccion": "Edges of Eternities",
+    "fecha_salida": "2025-08-01",
+    "juego": "Magic",
     "precio": 140.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres Jumpstart",
-    "fecha_envio": "2025-11-11"
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "56b6238f-aaed-4a86-b8df-c1fa02aea7db",
+    "nombre": "Bundle",
+    "coleccion": "Edges of Eternities",
+    "fecha_salida": "2025-08-01",
+    "juego": "Magic",
+    "precio": 55.0,
+    "reserva": 5.0,
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "ee39576d-5a4f-40c4-ade2-cd162efa7194",
+    "nombre": "Caja de sobres Collector",
+    "coleccion": "Edges of Eternities",
+    "fecha_salida": "2025-08-01",
+    "juego": "Magic",
+    "precio": 275.0,
+    "reserva": 20.0,
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "7efc6139-fff7-4c18-b5c3-29b1454fce1b",
+    "nombre": "Mazos de commander",
+    "coleccion": "Edges of Eternities",
+    "fecha_salida": "2025-08-01",
+    "juego": "Magic",
+    "precio": 45.0,
+    "reserva": 5.0,
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "e44542d3-c1e8-4ae3-92be-798c23043b0d",
+    "nombre": "Cajas de sobres",
+    "coleccion": "Marvel's Spiderman",
+    "fecha_salida": "2025-09-26",
+    "juego": "Magic",
+    "precio": 195.0,
+    "reserva": 20.0,
+    "fecha_envio": "2025-09-25",
+    "comentario": ""
+  },
+  {
+    "id": "f9c18588-a0a6-4aa1-89e3-5b8485843499",
+    "nombre": "Gift Bundle",
+    "coleccion": "Marvel's Spiderman",
+    "fecha_salida": null,
+    "juego": "Magic",
+    "precio": 85.0,
+    "reserva": 5.0,
+    "fecha_envio": null,
+    "comentario": ""
+  },
+  {
+    "id": "76c443f8-e800-4cee-9650-88e15e1a32d2",
+    "nombre": "Commander’s Bundle",
+    "coleccion": "Avatar",
+    "fecha_salida": "2025-11-21",
+    "juego": "Magic",
+    "precio": 100.0,
+    "reserva": 20.0,
+    "fecha_envio": null,
+    "comentario": ""
   },
   {
     "id": "a75d53c6-7d33-4972-aac7-86c4cfff981a",
@@ -191,7 +227,6 @@
     "juego": "One Piece",
     "precio": 40.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -203,7 +238,6 @@
     "juego": "One Piece",
     "precio": 35.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -215,7 +249,6 @@
     "juego": "One Piece",
     "precio": 25.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -227,7 +260,6 @@
     "juego": "One Piece",
     "precio": 25.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -239,7 +271,6 @@
     "juego": "One Piece",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -251,7 +282,6 @@
     "juego": "One Piece",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -263,7 +293,6 @@
     "juego": "One Piece",
     "precio": 1020.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -275,7 +304,6 @@
     "juego": "One Piece",
     "precio": 30.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -287,7 +315,6 @@
     "juego": "One Piece",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -299,7 +326,6 @@
     "juego": "One Piece",
     "precio": 1080.0,
     "reserva": 180.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -311,7 +337,6 @@
     "juego": "One Piece",
     "precio": 10.0,
     "reserva": 5.0,
-    "tipo": "Double Pack",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -323,7 +348,6 @@
     "juego": "One Piece",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -335,7 +359,6 @@
     "juego": "One Piece",
     "precio": 1080.0,
     "reserva": 180.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -347,7 +370,6 @@
     "juego": "One Piece",
     "precio": 10.0,
     "reserva": 5.0,
-    "tipo": "Tin Pack",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -359,7 +381,6 @@
     "juego": "One Piece",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -371,7 +392,6 @@
     "juego": "One Piece",
     "precio": 40.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -383,7 +403,6 @@
     "juego": "One Piece",
     "precio": 100.0,
     "reserva": 10.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -395,7 +414,6 @@
     "juego": "One Piece",
     "precio": 1080.0,
     "reserva": 180.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -407,7 +425,6 @@
     "juego": "One Piece",
     "precio": 25.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -419,7 +436,6 @@
     "juego": "One Piece",
     "precio": 25.0,
     "reserva": 5.0,
-    "tipo": "Extras",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -431,7 +447,6 @@
     "juego": "One Piece",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -443,7 +458,6 @@
     "juego": "One Piece",
     "precio": 1020.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -455,7 +469,6 @@
     "juego": "One Piece",
     "precio": 10.0,
     "reserva": 5.0,
-    "tipo": "Double Pack",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -467,7 +480,6 @@
     "juego": "Final Fantasy",
     "precio": 40.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -479,7 +491,6 @@
     "juego": "Final Fantasy",
     "precio": 60.0,
     "reserva": 5.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -491,7 +502,6 @@
     "juego": "Dragon Ball",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -503,7 +513,6 @@
     "juego": "Digimon",
     "precio": 100.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -515,7 +524,6 @@
     "juego": "Digimon",
     "precio": 1020.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -527,7 +535,6 @@
     "juego": "Lorcana",
     "precio": 140.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -539,19 +546,17 @@
     "juego": "Lorcana",
     "precio": 20.0,
     "reserva": 5.0,
-    "tipo": "Mazos de inicio",
     "fecha_envio": null,
     "comentario": ""
   },
   {
     "id": "402454ae-ec2f-4b92-bb60-fedff3ed5a7b",
-    "nombre": "Illuminer's Trove",
+    "nombre": "Illuminer’s Trove",
     "coleccion": "Fabled",
     "fecha_salida": "2025-08-29",
     "juego": "Lorcana",
     "precio": 55.0,
     "reserva": 5.0,
-    "tipo": "Illuminer's Trove",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -563,7 +568,6 @@
     "juego": "Lorcana",
     "precio": 25.0,
     "reserva": 5.0,
-    "tipo": "Collector Starter",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -575,7 +579,6 @@
     "juego": "Lorcana",
     "precio": 30.0,
     "reserva": 5.0,
-    "tipo": "Gift Set",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -587,7 +590,6 @@
     "juego": "Gundam",
     "precio": 95.0,
     "reserva": 10.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -599,7 +601,6 @@
     "juego": "Gundam",
     "precio": 1020.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -611,7 +612,6 @@
     "juego": "Gundam",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -623,7 +623,6 @@
     "juego": "Gundam",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -635,7 +634,6 @@
     "juego": "Gundam",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -647,7 +645,6 @@
     "juego": "Gundam",
     "precio": 15.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -659,7 +656,6 @@
     "juego": "Gundam",
     "precio": 95.0,
     "reserva": 10.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -671,7 +667,6 @@
     "juego": "Gundam",
     "precio": 1020.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -683,7 +678,6 @@
     "juego": "Riftbound",
     "precio": 125.0,
     "reserva": 20.0,
-    "tipo": "Caja de sobres",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -695,7 +689,6 @@
     "juego": "Riftbound",
     "precio": 720.0,
     "reserva": 120.0,
-    "tipo": "Case",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -707,7 +700,6 @@
     "juego": "Riftbound",
     "precio": 20.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -719,7 +711,6 @@
     "juego": "Riftbound",
     "precio": 20.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -731,7 +722,6 @@
     "juego": "Riftbound",
     "precio": 20.0,
     "reserva": 5.0,
-    "tipo": "Starter Deck",
     "fecha_envio": null,
     "comentario": ""
   },
@@ -743,19 +733,7 @@
     "juego": "Riftbound",
     "precio": 30.0,
     "reserva": 5.0,
-    "tipo": "Proving Grounds",
     "fecha_envio": null,
-    "comentario": ""
-  },
-  {
-    "id": "20292275-20be-464a-8073-8ccc674533fa",
-    "nombre": "prueba",
-    "juego": "Final Fantasy",
-    "coleccion": "Gunslinger in the Abyss",
-    "fecha_salida": "2025-10-01",
-    "fecha_envio": "2025-09-26",
-    "precio": 12.0,
-    "precio_reserva": 0.0,
     "comentario": ""
   }
 ]

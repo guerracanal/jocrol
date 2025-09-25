@@ -1,30 +1,28 @@
 [
   {
-    "id": "f4f5d9da-2eb2-4a92-b778-b145e2fc40e4",
+    "id": "159c700c-7060-4931-b9fb-f8fb60899f49",
     "cliente_id": "7a5d749b-d52b-4dcb-9245-6bddad909bc6",
-    "tipo_reserva": "evento",
-    "lanzamiento_id": null,
-    "evento_id": "54a9575e-8472-42df-b1a4-2dfc90d7f289",
-    "cantidad": 1,
-    "fecha_reserva": "2025-09-24",
-    "estado": "confirmada",
-    "pagado": true,
-    "pagado_cantidad": 0.0,
-    "tipo_pago": "Efectivo",
-    "notas": ""
-  },
-  {
-    "id": "d7fb33df-12b5-4279-982c-7dfd56db7cc1",
-    "cliente_id": "7a5d749b-d52b-4dcb-9245-6bddad909bc6",
-    "tipo_reserva": "lanzamiento",
-    "lanzamiento_id": "f28a2a0d-0e4c-4e1b-8b1a-8b1b4b1e4b1a",
+    "lanzamiento_id": "583af7fc-17d6-4902-9091-87909ae85b72",
     "evento_id": null,
     "cantidad": 1,
-    "fecha_reserva": "2025-09-24",
-    "estado": "pendiente",
-    "pagado": false,
-    "pagado_cantidad": 50.0,
-    "tipo_pago": "Visa",
-    "notas": "Esta es una nota de prueba."
+    "fecha_reserva": "2025-09-25",
+    "estado": "Confirmado",
+    "pagado": 40.0,
+    "tipo_pago": "Efectivo",
+    "notas": "",
+    "pago_completo": true
+  },
+  {
+    "id": "fc9be547-bd28-47e7-9027-1c8c962a5201",
+    "cliente_id": "10cf20ea-5e79-438a-a1ab-70c07159132d",
+    "lanzamiento_id": null,
+    "evento_id": "0ad5e239-9c10-4d64-a297-835cc0a4f0b0",
+    "cantidad": 1,
+    "fecha_reserva": "2025-09-25",
+    "estado": "Pendiente",
+    "pagado": 0.0,
+    "tipo_pago": "",
+    "notas": "",
+    "pago_completo": false
   }
 ]

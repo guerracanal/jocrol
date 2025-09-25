@@ -133,7 +133,7 @@ def crear_lanzamiento(datos_lanzamiento):
         "fecha_salida": datos_lanzamiento.get('fecha_salida'),
         "fecha_envio": datos_lanzamiento.get('fecha_envio'),
         "precio": float(datos_lanzamiento.get('precio') or 0),
-        "reserva": float(datos_lanzamiento.get('reserva') or 0),
+        "precio_reserva": float(datos_lanzamiento.get('precio_reserva') or 0),
         "comentario": datos_lanzamiento.get('comentario'),
     }
     lanzamientos.append(lanzamiento)
@@ -151,7 +151,7 @@ def actualizar_lanzamiento(lanzamiento_id, datos_lanzamiento):
                 "fecha_salida": datos_lanzamiento.get('fecha_salida'),
                 "fecha_envio": datos_lanzamiento.get('fecha_envio'),
                 "precio": float(datos_lanzamiento.get('precio') or 0),
-                "reserva": float(datos_lanzamiento.get('reserva') or 0),
+                "precio_reserva": float(datos_lanzamiento.get('precio_reserva') or 0),
                 "comentario": datos_lanzamiento.get('comentario'),
             }
             break

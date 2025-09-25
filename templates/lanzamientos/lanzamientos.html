@@ -123,9 +123,9 @@
                     <span class="badge" style="background-color: {{ lanzamiento.coleccion_color }};">{{ lanzamiento.coleccion }}</span>
                 </td>
                 <td>{{ lanzamiento.fecha_salida | formato_fecha }}</td>
-                <td>{{ lanzamiento.fecha_envio | formato_fecha or 'N/A' }}</td>
-                <td>{{ "%.2f"|format(lanzamiento.precio) }}€</td>
-                <td>{{ "%.2f"|format(lanzamiento.reserva) }}€</td>
+                <td>{{ lanzamiento.fecha_envio | formato_fecha or '-' }}</td>
+                <td>{{ "%.2f"|format(lanzamiento.precio or 0) }}€</td>
+                <td>{{ "%.2f"|format(lanzamiento.reserva or 0) }}€</td>
                 <td>
                     <a href="{{ url_for('lanzamientos.editar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
                     <form action="{{ url_for('lanzamientos.eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este lanzamiento?');">

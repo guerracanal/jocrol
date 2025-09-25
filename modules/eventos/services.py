@@ -71,7 +71,7 @@ def obtener_eventos_filtrados(filters):
             evento['juego_color'] = '#6c757d'
             evento['coleccion_color'] = '#6c757d'
             
-    eventos_filtrados.sort(key=lambda x: x.get('fecha', ''), reverse=True)
+    eventos_filtrados.sort(key=lambda x: x.get('fecha') or '', reverse=True)
     
     return eventos_filtrados
 

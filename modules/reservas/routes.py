@@ -10,6 +10,7 @@ from modules.reservas.services import (
     obtener_eventos_todos,
     eliminar_reserva as eliminar_reserva_servicio
 )
+from modules.lanzamientos.services import obtener_juegos_y_colecciones
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/reservas')
 
@@ -35,7 +36,17 @@ def nueva_reserva():
     lanzamientos = obtener_lanzamientos_todos()
     clientes = obtener_clientes_todos()
     eventos = obtener_eventos_todos()
-    return render_template('reservas/nueva_reserva.html', lanzamientos=lanzamientos, clientes=clientes, eventos=eventos, now=datetime.now())
+    juegos_colecciones = obtener_juegos_y_colecciones()
+    juegos = list(juegos_colecciones.get('juegos', {}).keys())
+    return render_template(
+        'reservas/nueva_reserva.html', 
+        lanzamientos=lanzamientos, 
+        clientes=clientes, 
+        eventos=eventos, 
+        juegos_colecciones=juegos_colecciones,
+        juegos=juegos,
+        now=datetime.now()
+    )
 
 @reservas_bp.route('/editar/<reserva_id>', methods=['GET', 'POST'])
 def editar_reserva(reserva_id):
@@ -53,7 +64,25 @@ def editar_reserva(reserva_id):
     lanzamientos = obtener_lanzamientos_todos()
     clientes = obtener_clientes_todos()
     eventos = obtener_eventos_todos()
-    return render_template('reservas/editar_reserva.html', reserva=reserva, lanzamientos=lanzamientos, clientes=clientes, eventos=eventos)
+    juegos_colecciones = obtener_juegos_y_colecciones()
+    juegos = list(juegos_colecciones.get('juegos', {}).keys())
+    
+    producto = None
+    if reserva.get('lanzamiento_id'):
+        producto = next((l for l in lanzamientos if l['id'] == reserva['lanzamiento_id']), None)
+    elif reserva.get('evento_id'):
+        producto = next((e for e in eventos if e['id'] == reserva['evento_id']), None)
+
+    return render_template(
+        'reservas/editar_reserva.html', 
+        reserva=reserva, 
+        lanzamientos=lanzamientos, 
+        clientes=clientes, 
+        eventos=eventos,
+        juegos_colecciones=juegos_colecciones,
+        juegos=juegos,
+        producto=producto
+    )
 
 @reservas_bp.route('/eliminar/<reserva_id>')
 def eliminar_reserva(reserva_id):

@@ -1,210 +1,229 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Nueva Reserva - Gestión de Lanzamientos{% endblock %}
+
 {% block content %}
-<h1>Nueva Reserva</h1>
-<form method="POST">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="cliente_id" class="form-label">Cliente</label>
-                <select class="form-control" id="cliente_id" name="cliente_id" required>
-                    <option value="">Seleccionar cliente...</option>
-                    {% for cliente in clientes %}
-                    <option value="{{ cliente.id }}">{{ cliente.nombre }} ({{ cliente.email }})</option>
-                    {% endfor %}
-                </select>
-            </div>
+<div class="container mt-4">
+    <h2>Añadir Nueva Reserva</h2>
+    <form action="{{ url_for('reservas.nueva_reserva') }}" method="post">
 
-            <div class="mb-3">
-                <label for="tipo_reserva" class="form-label">Tipo de Reserva</label>
-                <select class="form-control" id="tipo_reserva" name="tipo_reserva">
-                    <option value="lanzamiento" selected>Lanzamiento</option>
-                    <option value="evento">Evento</option>
-                </select>
-            </div>
-            
-            <div class="mb-3" id="lanzamiento-group">
-                <label for="lanzamiento_id" class="form-label">Lanzamiento</label>
-                <select class="form-control" id="lanzamiento_id" name="lanzamiento_id">
-                    <option value="" data-precio="0" data-reserva="0">Seleccionar lanzamiento...</option>
-                    {% for lanzamiento in lanzamientos %}
-                    <option value="{{ lanzamiento.id }}" 
-                            data-precio="{{ lanzamiento.precio or 0 }}" 
-                            data-reserva="{{ lanzamiento.reserva or 0 }}">
-                        {{ lanzamiento.nombre }} - {{ lanzamiento.coleccion }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="mb-3 d-none" id="evento-group">
-                <label for="evento_id" class="form-label">Evento</label>
-                <select class="form-control" id="evento_id" name="evento_id">
-                    <option value="" data-precio="0" data-reserva="0">Seleccionar evento...</option>
-                    {% for evento in eventos %}
-                    <option value="{{ evento.id }}" 
-                            data-precio="{{ evento.precio or 0 }}" 
-                            data-reserva="{{ evento.reserva or 0 }}">
-                        {{ evento.nombre }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label for="cantidad" class="form-label">Cantidad</label>
-                <input type="number" min="1" class="form-control" id="cantidad" name="cantidad" value="1" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="fecha_reserva" class="form-label">Fecha de Reserva</label>
-                <input type="date" class="form-control" id="fecha_reserva" name="fecha_reserva" 
-                       value="{{ now.strftime('%Y-%m-%d') }}">
-            </div>
+        <div class="mb-3">
+            <label for="cliente_id" class="form-label">Cliente</label>
+            <select class="form-select" id="cliente_id" name="cliente_id" required>
+                <option value="">Selecciona un cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                {% endfor %}
+            </select>
         </div>
-        
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="estado" class="form-label">Estado</label>
-                <select class="form-control" id="estado" name="estado">
-                    <option value="pendiente" selected>Pendiente</option>
-                    <option value="confirmada">Confirmada</option>
-                    <option value="cancelada">Cancelada</option>
-                </select>
-            </div>
 
-            <div class="mb-3">
-                <label for="pagado_cantidad" class="form-label">Cantidad Pagada (€)</label>
-                <input type="number" step="0.01" class="form-control" id="pagado_cantidad" name="pagado_cantidad" value="0.00">
-            </div>
-
-            <div class="mb-3">
-                <label for="tipo_pago" class="form-label">Tipo de Pago</label>
-                <select class="form-control" id="tipo_pago" name="tipo_pago">
-                    <option value="Visa">Visa</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Paygold">Paygold</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="notas" class="form-label">Notas</label>
-                <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
-            </div>
-
-            <div class="mb-3 p-3 border rounded bg-light">
-                <h5>Resumen de Pago</h5>
-                <p>Precio Unitario: <strong id="precio-unitario">0.00 €</strong></p>
-                <p>Importe Total: <strong id="total-reserva">0.00 €</strong></p>
-                <p>Importe Pendiente: <strong id="pendiente-reserva" class="text-danger">0.00 €</strong></p>
-                <p><small class="text-muted">Importe de la reserva: <strong id="importe-reserva">0.00 €</strong></small></p>
-            </div>
-            
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="pagado" name="pagado">
-                <label class="form-check-label" for="pagado">Reserva Completamente Pagada</label>
-            </div>
+        <div class="mb-3">
+            <label for="tipo_producto" class="form-label">Tipo de Producto</label>
+            <select class="form-select" id="tipo_producto" name="tipo_producto">
+                <option value="lanzamiento">Lanzamiento</option>
+                <option value="evento">Evento</option>
+            </select>
         </div>
-    </div>
-    
-    <button type="submit" class="btn btn-success">Crear Reserva</button>
-    <a href="{{ url_for('reservas.listar_reservas') }}" class="btn btn-secondary">Cancelar</a>
-</form>
 
+        <div class="mb-3">
+            <label for="juego" class="form-label">Juego</label>
+            <select class="form-select" id="juego" name="juego" required>
+                <option value="">Selecciona un juego</option>
+                {% for juego in juegos %}
+                <option value="{{ juego }}">{{ juego }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="coleccion" class="form-label">Colección</label>
+            <select class="form-select" id="coleccion" name="coleccion" disabled>
+                <option value="">Primero selecciona un juego</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="producto_id" class="form-label">Producto</label>
+            <select class="form-select" id="producto_id" name="producto_id" required disabled>
+                <option value="">Selecciona un producto</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" value="1" min="1" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="pagado" class="form-label">Pagado</label>
+            <input type="number" step="0.01" class="form-control" id="pagado" name="pagado" value="0.0">
+        </div>
+
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select class="form-select" id="estado" name="estado">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Entregado">Entregado</option>
+            </select>
+        </div>
+
+        <div class="mb-3 p-3 border rounded bg-light">
+            <h5>Resumen de Pago</h5>
+            <p>Precio Unitario: <strong id="precio-unitario">0.00 €</strong></p>
+            <p>Precio Reserva: <strong id="precio-reserva">0.00 €</strong></p>
+            <p>Importe Total: <strong id="total-reserva">0.00 €</strong></p>
+            <p>Importe Pendiente: <strong id="pendiente-reserva" class="text-danger">0.00 €</strong></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="tipo_pago" class="form-label">Tipo de Pago</label>
+            <select class="form-select" id="tipo_pago" name="tipo_pago">
+                <option value="">Selecciona un método de pago</option>
+                <option value="Visa">Visa</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="paygold">PayGold</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="notas" class="form-label">Notas</label>
+            <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Añadir Reserva</button>
+        <a href="{{ url_for('reservas.listar_reservas') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tipoReservaSelect = document.getElementById('tipo_reserva');
-    const lanzamientoGroup = document.getElementById('lanzamiento-group');
-    const eventoGroup = document.getElementById('evento-group');
-    const lanzamientoSelect = document.getElementById('lanzamiento_id');
-    const eventoSelect = document.getElementById('evento_id');
-    const cantidadInput = document.getElementById('cantidad');
-    const pagadoInput = document.getElementById('pagado_cantidad');
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Element References ---
+        const tipoProductoSelect = document.getElementById('tipo_producto');
+        const juegoSelect = document.getElementById('juego');
+        const coleccionSelect = document.getElementById('coleccion');
+        const productoSelect = document.getElementById('producto_id');
+        const cantidadInput = document.getElementById('cantidad');
+        const pagadoInput = document.getElementById('pagado');
+        const precioUnitarioElem = document.getElementById('precio-unitario');
+        const precioReservaElem = document.getElementById('precio-reserva');
+        const totalReservaElem = document.getElementById('total-reserva');
+        const pendienteReservaElem = document.getElementById('pendiente-reserva');
 
-    const precioUnitarioElem = document.getElementById('precio-unitario');
-    const totalReservaElem = document.getElementById('total-reserva');
-    const pendienteReservaElem = document.getElementById('pendiente-reserva');
-    const importeReservaElem = document.getElementById('importe-reserva');
+        // --- Data from Flask ---
+        const juegosData = {{ juegos_colecciones|tojson }};
+        const productos = {
+            lanzamientos: {{ lanzamientos|tojson }},
+            eventos: {{ eventos|tojson }}
+        };
 
-    function toggleReservaFields() {
-        if (tipoReservaSelect.value === 'lanzamiento') {
-            lanzamientoGroup.classList.remove('d-none');
-            eventoGroup.classList.add('d-none');
-            eventoSelect.value = '';
-        } else {
-            lanzamientoGroup.classList.add('d-none');
-            eventoGroup.classList.remove('d-none');
-            lanzamientoSelect.value = '';
-        }
-        autoFillPagado();
-    }
+        // --- Core Functions ---
+        function calcularTotales() {
+            const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+            let precioUnitario = 0;
+            let precioReserva = 0;
 
-    function calcularTotales() {
-        let selectedOption;
-        let importeReserva = 0;
-        if (tipoReservaSelect.value === 'lanzamiento') {
-            selectedOption = lanzamientoSelect.options[lanzamientoSelect.selectedIndex];
-            if(selectedOption) {
-              importeReserva = parseFloat(selectedOption.dataset.reserva) || 0;
+            if (!selectedOption || !selectedOption.dataset.precio || selectedOption.value === '') {
+                precioUnitarioElem.textContent = '0.00 €';
+                precioReservaElem.textContent = '0.00 €';
+                totalReservaElem.textContent = '0.00 €';
+                pendienteReservaElem.textContent = '0.00 €';
+                pendienteReservaElem.classList.add('text-danger');
+                pendienteReservaElem.classList.remove('text-success');
+                return;
             }
-        } else {
-            selectedOption = eventoSelect.options[eventoSelect.selectedIndex];
-            if(selectedOption) {
-              importeReserva = parseFloat(selectedOption.dataset.reserva) || 0;
-            }
-        }
 
-        const precioUnitario = selectedOption ? parseFloat(selectedOption.dataset.precio) || 0 : 0;
-        const cantidad = parseInt(cantidadInput.value) || 1;
-        const pagado = parseFloat(pagadoInput.value) || 0;
+            precioUnitario = parseFloat(selectedOption.dataset.precio) || 0;
+            precioReserva = parseFloat(selectedOption.dataset.precioReserva) || 0;
+            const cantidad = parseInt(cantidadInput.value) || 1;
+            const pagado = parseFloat(pagadoInput.value) || 0;
+            const totalReserva = (precioUnitario * cantidad) + precioReserva;
+            const pendiente = totalReserva - pagado;
 
-        const totalReserva = precioUnitario * cantidad;
-        const pendiente = totalReserva - pagado;
-        const totalReservaConImporte = importeReserva * cantidad;
-
-        precioUnitarioElem.textContent = precioUnitario.toFixed(2) + ' €';
-        totalReservaElem.textContent = totalReserva.toFixed(2) + ' €';
-        pendienteReservaElem.textContent = pendiente.toFixed(2) + ' €';
-        importeReservaElem.textContent = totalReservaConImporte.toFixed(2) + ' €';
-        
-        if (pendiente <= 0) {
-            pendienteReservaElem.classList.remove('text-danger');
-            pendienteReservaElem.classList.add('text-success');
-        } else {
-            pendienteReservaElem.classList.add('text-danger');
-            pendienteReservaElem.classList.remove('text-success');
-        }
-    }
-
-    function autoFillPagado() {
-        let selectedOption;
-        let importeReserva = 0;
-        if (tipoReservaSelect.value === 'lanzamiento') {
-            selectedOption = lanzamientoSelect.options[lanzamientoSelect.selectedIndex];
-            if(selectedOption) {
-              importeReserva = parseFloat(selectedOption.dataset.reserva) || 0;
-            }
-        } else {
-            selectedOption = eventoSelect.options[eventoSelect.selectedIndex];
-            if(selectedOption) {
-              importeReserva = parseFloat(selectedOption.dataset.reserva) || 0;
+            precioUnitarioElem.textContent = precioUnitario.toFixed(2) + ' €';
+            precioReservaElem.textContent = precioReserva.toFixed(2) + ' €';
+            totalReservaElem.textContent = totalReserva.toFixed(2) + ' €';
+            pendienteReservaElem.textContent = pendiente.toFixed(2) + ' €';
+            
+            if (pendiente <= 0) {
+                pendienteReservaElem.classList.remove('text-danger');
+                pendienteReservaElem.classList.add('text-success');
+            } else {
+                pendienteReservaElem.classList.add('text-danger');
+                pendienteReservaElem.classList.remove('text-success');
             }
         }
-        const cantidad = parseInt(cantidadInput.value) || 1;
 
-        if (importeReserva > 0) {
-            pagadoInput.value = (importeReserva * cantidad).toFixed(2);
+        function populateColecciones(selectedJuego) {
+            coleccionSelect.innerHTML = '<option value="">Todas las colecciones</option>';
+            coleccionSelect.disabled = true;
+            if (selectedJuego && juegosData.juegos[selectedJuego]) {
+                const colecciones = Object.values(juegosData.juegos[selectedJuego].colecciones).flat();
+                coleccionSelect.disabled = false;
+                colecciones.forEach(function(coleccion) {
+                    const option = document.createElement('option');
+                    option.value = coleccion;
+                    option.textContent = coleccion;
+                    coleccionSelect.appendChild(option);
+                });
+            }
         }
+
+        function updateProductos() {
+            const selectedJuego = juegoSelect.value;
+            const selectedColeccion = coleccionSelect.value;
+            const tipoProducto = tipoProductoSelect.value === 'lanzamiento' ? 'lanzamientos' : 'eventos';
+            const productosDisponibles = productos[tipoProducto];
+
+            productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
+            productoSelect.disabled = true;
+
+            if (selectedJuego) {
+                productoSelect.disabled = false;
+                let filteredProductos = productosDisponibles.filter(p => p.juego === selectedJuego);
+
+                if (selectedColeccion) {
+                    filteredProductos = filteredProductos.filter(p => p.coleccion === selectedColeccion);
+                }
+
+                if (filteredProductos.length === 0) {
+                     productoSelect.innerHTML = '<option value="">No hay productos disponibles</option>';
+                } else {
+                     productoSelect.innerHTML = '<option value="">Selecciona un producto</option>';
+                }
+
+                filteredProductos.forEach(function(producto) {
+                    const option = document.createElement('option');
+                    option.value = producto.id;
+                    option.dataset.precio = producto.precio;
+                    option.dataset.precioReserva = producto.precio_reserva;
+                    option.textContent = producto.nombre;
+                    productoSelect.appendChild(option);
+                });
+            } else {
+                 productoSelect.innerHTML = '<option value="">Primero selecciona un juego</option>';
+            }
+            calcularTotales();
+        }
+
+        // --- Event Listeners ---
+        juegoSelect.addEventListener('change', function() {
+            populateColecciones(this.value);
+            updateProductos();
+        });
+
+        coleccionSelect.addEventListener('change', updateProductos);
+        tipoProductoSelect.addEventListener('change', updateProductos);
+
+        productoSelect.addEventListener('change', calcularTotales);
+        cantidadInput.addEventListener('input', calcularTotales);
+        pagadoInput.addEventListener('input', calcularTotales);
+
+        // Initial check in case of browser auto-fill
         calcularTotales();
-    }
-
-    tipoReservaSelect.addEventListener('change', toggleReservaFields);
-    lanzamientoSelect.addEventListener('change', autoFillPagado);
-    eventoSelect.addEventListener('change', autoFillPagado);
-    cantidadInput.addEventListener('input', autoFillPagado);
-    pagadoInput.addEventListener('input', calcularTotales);
-
-    // Initial setup
-    toggleReservaFields();
-});
+    });
 </script>
 {% endblock %}

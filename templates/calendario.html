@@ -5,8 +5,11 @@
 {% block styles %}
 <style>
     /* Mejora el cursor y añade una transición suave al pasar sobre los eventos */
-    .fc-event {
+    .fc-event, .fc-list-event {
         cursor: pointer;
+    }
+
+    .fc-event {
         transition: opacity 0.2s ease-in-out;
     }
 

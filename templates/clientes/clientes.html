@@ -53,7 +53,7 @@
                                 <tbody>
                                     {% for reserva in cliente.reservas %}
                                         <tr>
-                                            <td>{{ reserva.item.nombre if reserva.item else 'N/A' }}</td>
+                                            <td>{{ reserva.item.nombre if reserva.item else '-' }}</td>
                                             <td>{{ reserva.cantidad }}</td>
                                             <td>{{ reserva.fecha_reserva }}</td>
                                             <td>

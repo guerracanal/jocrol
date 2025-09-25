@@ -27,19 +27,21 @@ def obtener_reserva_por_id(reserva_id):
 def crear_reserva(datos_reserva):
     reservas = obtener_reservas_todas()
     nuevo_id = generar_id()
+    
+    pagado_monto = float(datos_reserva.get('pagado', 0) or 0)
+
     reserva = {
         "id": nuevo_id,
         "cliente_id": datos_reserva.get('cliente_id'),
-        "tipo_reserva": datos_reserva.get('tipo_reserva'),
-        "lanzamiento_id": datos_reserva.get('lanzamiento_id') if datos_reserva.get('tipo_reserva') == 'lanzamiento' else None,
-        "evento_id": datos_reserva.get('evento_id') if datos_reserva.get('tipo_reserva') == 'evento' else None,
+        "lanzamiento_id": datos_reserva.get('producto_id') if datos_reserva.get('tipo_producto') == 'lanzamiento' else None,
+        "evento_id": datos_reserva.get('producto_id') if datos_reserva.get('tipo_producto') == 'evento' else None,
         "cantidad": int(datos_reserva.get('cantidad') or 1),
         "fecha_reserva": datos_reserva.get('fecha_reserva') or datetime.now().strftime('%Y-%m-%d'),
-        "estado": datos_reserva.get('estado', 'pendiente'),
-        "pagado": 'pagado' in datos_reserva,
-        "pagado_cantidad": float(datos_reserva.get('pagado_cantidad') or 0),
+        "estado": datos_reserva.get('estado', 'Pendiente'),
+        "pagado": pagado_monto,
         "tipo_pago": datos_reserva.get('tipo_pago'),
-        "notas": datos_reserva.get('notas')
+        "notas": datos_reserva.get('notas'),
+        "pago_completo": False
     }
     reservas.append(reserva)
     guardar_datos(RESERVAS_FILE, reservas)
@@ -50,16 +52,41 @@ def actualizar_reserva(reserva_id, datos_reserva):
     for i, r in enumerate(reservas):
         if r.get('id') == reserva_id:
             reservas[i]['cliente_id'] = datos_reserva.get('cliente_id')
-            reservas[i]['tipo_reserva'] = datos_reserva.get('tipo_reserva')
-            reservas[i]['lanzamiento_id'] = datos_reserva.get('lanzamiento_id') if datos_reserva.get('tipo_reserva') == 'lanzamiento' else None
-            reservas[i]['evento_id'] = datos_reserva.get('evento_id') if datos_reserva.get('tipo_reserva') == 'evento' else None
+            
+            tipo_producto = datos_reserva.get('tipo_producto')
+            if tipo_producto == 'lanzamiento':
+                reservas[i]['lanzamiento_id'] = datos_reserva.get('producto_id')
+                reservas[i]['evento_id'] = None
+            elif tipo_producto == 'evento':
+                reservas[i]['evento_id'] = datos_reserva.get('producto_id')
+                reservas[i]['lanzamiento_id'] = None
+            
             reservas[i]['cantidad'] = int(datos_reserva.get('cantidad') or 1)
-            reservas[i]['fecha_reserva'] = datos_reserva.get('fecha_reserva', r.get('fecha_reserva'))
             reservas[i]['estado'] = datos_reserva.get('estado', r.get('estado'))
-            reservas[i]['pagado'] = 'pagado' in datos_reserva
-            reservas[i]['pagado_cantidad'] = float(datos_reserva.get('pagado_cantidad') or 0)
+            
+            pagado_val = datos_reserva.get('pagado')
+            if pagado_val is not None and pagado_val != '':
+                reservas[i]['pagado'] = float(pagado_val)
+            else:
+                reservas[i]['pagado'] = 0
+            
             reservas[i]['tipo_pago'] = datos_reserva.get('tipo_pago')
             reservas[i]['notas'] = datos_reserva.get('notas')
+
+            item_id = reservas[i].get('lanzamiento_id') or reservas[i].get('evento_id')
+            item = None
+            if reservas[i].get('lanzamiento_id'):
+                item = next((l for l in obtener_lanzamientos_todos() if l['id'] == item_id), None)
+            elif reservas[i].get('evento_id'):
+                item = next((e for e in obtener_eventos_todos() if e['id'] == item_id), None)
+            
+            if item:
+                precio = float(item.get('precio', 0))
+                precio_reserva = float(item.get('precio_reserva', 0))
+                cantidad = int(reservas[i]['cantidad'])
+                total = (precio * cantidad) + precio_reserva
+                reservas[i]['pago_completo'] = float(reservas[i]['pagado']) >= total
+
             reserva_actualizada = True
             break
     if not reserva_actualizada:
@@ -68,15 +95,11 @@ def actualizar_reserva(reserva_id, datos_reserva):
 
 def eliminar_reserva(reserva_id):
     reservas = obtener_reservas_todas()
-    reserva_encontrada = False
-    for i, r in enumerate(reservas):
-        if r.get('id') == reserva_id:
-            del reservas[i]
-            reserva_encontrada = True
-            break
-    if not reserva_encontrada:
+    if not any(r['id'] == reserva_id for r in reservas):
         raise ValueError(f"No se encontró la reserva con ID {reserva_id}")
-    guardar_datos(RESERVAS_FILE, reservas)
+    
+    reservas_actualizadas = [r for r in reservas if r['id'] != reserva_id]
+    guardar_datos(RESERVAS_FILE, reservas_actualizadas)
 
 def obtener_reservas_filtradas(filters):
     reservas_raw = obtener_reservas_todas()
@@ -85,53 +108,56 @@ def obtener_reservas_filtradas(filters):
     eventos = {e['id']: e for e in obtener_eventos_todos()}
 
     reservas_enriquecidas = []
+    total_pendiente_general = 0
+
     for r in reservas_raw:
-        r['cliente'] = clientes.get(r.get('cliente_id'))
-        if r.get('tipo_reserva') == 'lanzamiento':
-            r['item'] = lanzamientos.get(r.get('lanzamiento_id'))
-        elif r.get('tipo_reserva') == 'evento':
-            r['item'] = eventos.get(r.get('evento_id'))
-        else:
-            r['item'] = None
-        reservas_enriquecidas.append(r)
+        item_id = r.get('lanzamiento_id') or r.get('evento_id')
+        item = None
+        if r.get('lanzamiento_id'):
+            item = lanzamientos.get(item_id)
+        elif r.get('evento_id'):
+            item = eventos.get(item_id)
 
-    reservas_filtradas = reservas_enriquecidas
+        cliente = clientes.get(r.get('cliente_id'))
 
-    if filters.get('q'):
-        q = filters['q'].lower()
-        reservas_filtradas = [
-            r for r in reservas_filtradas if
-            (r['cliente'] and q in r['cliente'].get('nombre', '').lower()) or
-            (r['item'] and q in r['item'].get('nombre', '').lower())
-        ]
+        if not item or not cliente:
+            continue
 
-    if filters.get('start_date'):
-        reservas_filtradas = [r for r in reservas_filtradas if r.get('fecha_reserva') >= filters['start_date']]
+        r['item'] = item
+        r['cliente'] = cliente
 
-    if filters.get('end_date'):
-        reservas_filtradas = [r for r in reservas_filtradas if r.get('fecha_reserva') <= filters['end_date']]
+        precio = float(item.get('precio', 0))
+        precio_reserva = float(item.get('precio_reserva', 0))
+        cantidad = int(r.get('cantidad', 1))
+        total = (precio * cantidad) + precio_reserva
+        pagado = float(r.get('pagado', r.get('pagado_cantidad', 0)))
+        pendiente = total - pagado
 
-    if filters.get('payment_status'):
-        if filters['payment_status'] == 'pagado':
-            reservas_filtradas = [r for r in reservas_filtradas if r.get('pagado')]
-        elif filters['payment_status'] == 'pendiente':
-            reservas_filtradas = [r for r in reservas_filtradas if not r.get('pagado')]
+        r['total'] = total
+        r['pendiente'] = pendiente
+        r['pagado'] = pagado
+        r['pago_completo'] = pagado >= total
+        
+        q = filters.get('q', '').lower()
+        start_date = filters.get('start_date')
+        end_date = filters.get('end_date')
+        payment_status = filters.get('payment_status')
 
-    reservas_procesadas = []
-    total_pendiente = 0
+        match = True
+        if q and not (q in cliente['nombre'].lower() or q in item['nombre'].lower()):
+            match = False
+        if start_date and r.get('fecha_reserva') < start_date:
+            match = False
+        if end_date and r.get('fecha_reserva') > end_date:
+            match = False
+        if payment_status == 'pagado' and not r['pago_completo']:
+            match = False
+        if payment_status == 'pendiente' and r['pago_completo']:
+            match = False
+        
+        if match:
+            reservas_enriquecidas.append(r)
+            if not r['pago_completo']:
+                total_pendiente_general += pendiente
 
-    for r in reservas_filtradas:
-        item = r['item']
-        precio_total = 0
-        if item:
-            precio_item = float(item.get('precio', 0))
-            cantidad = int(r.get('cantidad', 0))
-            precio_total = precio_item * cantidad
-
-        pagado_cantidad = float(r.get('pagado_cantidad', 0))
-        r['pagado_cantidad'] = pagado_cantidad
-        r['pendiente'] = precio_total - pagado_cantidad
-        total_pendiente += r['pendiente']
-        reservas_procesadas.append(r)
-
-    return reservas_procesadas, total_pendiente
+    return reservas_enriquecidas, total_pendiente_general
