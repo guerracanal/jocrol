@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación con Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:create_app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:create_app()"]
