@@ -1,0 +1,26 @@
+# Entorno virtual
+.venv/
+
+# Ficheros de cache de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Ficheros de configuración del IDE
+.idea/
+.vscode/
+
+# Ficheros de Git
+.git/
+.gitignore
+
+# Archivos de entorno
+.env
+
+# Ficheros específicos de Firebase
+firebase.json
+.firebaserc
+firebase.debug.log
+
+# Dockerfile (no necesita estar dentro de la imagen)
+Dockerfile
