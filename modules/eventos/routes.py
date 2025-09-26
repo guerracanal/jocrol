@@ -47,8 +47,11 @@ def editar_evento(evento_id):
 
 @eventos_bp.route('/eliminar/<evento_id>', methods=['POST'])
 def eliminar_evento(evento_id):
-    eliminar_evento_servicio(evento_id)
-    flash('Evento eliminado con éxito.', 'success')
+    try:
+        eliminar_evento_servicio(evento_id)
+        flash('Evento eliminado con éxito.', 'success')
+    except ValueError as e:
+        flash(str(e), 'danger')
     return redirect(url_for('eventos.listar_eventos'))
 
 @eventos_bp.route('/calendario')

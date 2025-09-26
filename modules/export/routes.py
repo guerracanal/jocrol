@@ -1,33 +1,37 @@
 
-import json
 import io
 import os
-import uuid
 from flask import Blueprint, request, redirect, url_for, flash, send_file
 from openpyxl import Workbook, load_workbook
 from werkzeug.utils import secure_filename
 
+from data.data_manager import (
+    JUEGOS_COLECCIONES_COLLECTION,
+    CLIENTES_COLLECTION,
+    EVENTOS_COLLECTION,
+    LANZAMIENTOS_COLLECTION,
+    RESERVAS_COLLECTION
+)
+from modules.clientes.services import obtener_clientes_todos, crear_cliente
+from modules.eventos.services import obtener_eventos_todos, crear_evento, obtener_juegos_y_colecciones
+from modules.lanzamientos.services import obtener_lanzamientos_todos, crear_lanzamiento
+from modules.reservas.services import obtener_reservas_todas, crear_reserva
+
 export_bp = Blueprint('export', __name__, url_prefix='/export')
 
-# Obtener la ruta absoluta al directorio 'data'
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data'))
+def write_data_to_sheet(wb, sheet_name, data, headers_to_exclude=None):
+    """Crea una hoja y escribe datos en ella."""
+    ws = wb.create_sheet(title=sheet_name)
+    if not data:
+        ws.cell(row=1, column=1, value="No hay datos disponibles.")
+        return
 
-def load_data(filename):
-    """Carga datos desde un fichero JSON en el directorio data."""
-    filepath = os.path.join(DATA_DIR, filename)
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        if filename == 'juegos_colecciones.json':
-            return {"juegos": {}}
-        return []
+    headers = [key for key in data[0].keys() if key not in (headers_to_exclude or [])]
+    ws.append(headers)
 
-def save_data(filename, data):
-    """Guarda datos en un fichero JSON en el directorio data."""
-    filepath = os.path.join(DATA_DIR, filename)
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+    for item in data:
+        row = [item.get(h, '') for h in headers]
+        ws.append(row)
 
 @export_bp.route('/excel')
 def export_excel():
@@ -36,19 +40,19 @@ def export_excel():
     if 'Sheet' in wb.sheetnames:
         wb.remove(wb['Sheet'])
 
-    # Cargar todos los datos necesarios
-    juegos_data = load_data('juegos_colecciones.json')
-    clientes_data = load_data('clientes.json')
-    eventos_data = load_data('eventos.json')
-    lanzamientos_data = load_data('lanzamientos.json')
-    reservas_data = load_data('reservas.json')
+    # 1. Cargar todos los datos desde los servicios
+    juegos_data = obtener_juegos_y_colecciones()
+    clientes_data = obtener_clientes_todos()
+    eventos_data = obtener_eventos_todos()
+    lanzamientos_data = obtener_lanzamientos_todos()
+    reservas_data = obtener_reservas_todas()
 
-    # Mapeos para búsquedas rápidas
+    # Mapeos para búsquedas rápidas en la hoja de Reservas
     clientes_map = {c['id']: c for c in clientes_data}
     lanzamientos_map = {l['id']: l for l in lanzamientos_data}
     eventos_map = {e['id']: e for e in eventos_data}
-
-    # 1. Tratamiento para juegos_colecciones.json
+    
+    # 2. Hoja de Juegos y Colecciones
     ws_juegos = wb.create_sheet(title='Juegos')
     ws_juegos.append(['Juego', 'Color'])
     ws_colecciones = wb.create_sheet(title='Colecciones')
@@ -60,44 +64,33 @@ def export_excel():
             for coleccion in details.get('colecciones', []):
                 ws_colecciones.append([coleccion, juego])
 
-    # 2. Tratamiento para Clientes, Eventos, Lanzamientos (sin IDs)
-    data_sources = {
-        'Clientes': clientes_data,
-        'Eventos': eventos_data,
-        'Lanzamientos': lanzamientos_data
-    }
+    # 3. Hojas de Clientes, Eventos, Lanzamientos
+    write_data_to_sheet(wb, 'Clientes', clientes_data, headers_to_exclude=['id'])
+    write_data_to_sheet(wb, 'Eventos', eventos_data, headers_to_exclude=['id'])
+    write_data_to_sheet(wb, 'Lanzamientos', lanzamientos_data, headers_to_exclude=['id'])
 
-    for sheet_name, data in data_sources.items():
-        ws = wb.create_sheet(title=sheet_name)
-        if not data:
-            ws.cell(row=1, column=1, value="No hay datos disponibles.")
-            continue
-        
-        headers = [key for key in data[0].keys() if key != 'id']
-        ws.append(headers)
-        for item in data:
-            row = [item.get(h, '') for h in headers]
-            ws.append(row)
-
-    # 3. Tratamiento especial para Reservas
+    # 4. Hoja de Reservas (con tratamiento especial)
     ws_reservas = wb.create_sheet(title='Reservas')
     reservas_headers = ['telefono_cliente', 'tipo', 'nombre', 'juego', 'coleccion', 'cantidad', 'fecha_reserva', 'estado', 'pagado', 'tipo_pago', 'notas']
     ws_reservas.append(reservas_headers)
 
     for reserva in reservas_data:
         cliente_telefono = clientes_map.get(reserva.get('cliente_id'), {}).get('telefono', '-')
-
-        tipo, nombre, juego, coleccion = '', '', '', ''
-        item_id = reserva.get('lanzamiento_id') or reserva.get('evento_id')
-        item_map = lanzamientos_map if reserva.get('lanzamiento_id') else eventos_map
         
-        item = item_map.get(item_id)
+        tipo, nombre, juego, coleccion = '', '', '', ''
+        item = None
+
+        if reserva.get('lanzamiento_id'):
+            item = lanzamientos_map.get(reserva.get('lanzamiento_id'))
+        elif reserva.get('evento_id'):
+            item = eventos_map.get(reserva.get('evento_id'))
+
         if item:
-            tipo = item.get('tipo', '')
+            tipo = item.get('tipo', 'Lanzamiento') # Asumir 'Lanzamiento' si no hay tipo
             nombre = item.get('nombre', '')
             juego = item.get('juego', '')
             coleccion = item.get('coleccion', '')
-        
+
         row = [
             cliente_telefono,
             tipo,
@@ -113,15 +106,20 @@ def export_excel():
         ]
         ws_reservas.append(row)
 
+    # 5. Guardar y enviar el fichero
     excel_stream = io.BytesIO()
     wb.save(excel_stream)
     excel_stream.seek(0)
-    return send_file(excel_stream, as_attachment=True, download_name='export_gestion_lanzamientos.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-"""
+    return send_file(
+        excel_stream,
+        as_attachment=True,
+        download_name='export_gestion_lanzamientos.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 @export_bp.route('/import/excel', methods=['POST'])
 def import_excel():
-    # Importa una hoja específica de un fichero Excel, permitiendo sobrescribir o añadir.
     if 'excel_file' not in request.files or not request.files['excel_file'].filename:
         flash('No se ha seleccionado ningún fichero.', 'danger')
         return redirect(url_for('main.index'))
@@ -149,13 +147,16 @@ def import_excel():
 
         # Lógica para 'Juegos' y 'Colecciones'
         if sheet_to_import in ['Juegos', 'Colecciones']:
-            data = load_data('juegos_colecciones.json')
+            data = JUEGOS_COLECCIONES_COLLECTION.find_one({}, {'_id': 0}) or {'juegos': {}}
+            
             if import_mode == 'overwrite':
-                flash('La opción "Sobrescribir" para Juegos/Colecciones reconstruye desde cero.', 'warning')
                 if sheet_to_import == 'Juegos':
                     data['juegos'] = {item.get('Juego'): {'color': item.get('Color', ''), 'colecciones': []} for item in new_data_rows}
-            else: # Append/Update
-                 if sheet_to_import == 'Juegos':
+                else: # Colecciones
+                    flash('Para sobrescribir colecciones, por favor, sobrescriba la hoja "Juegos" y luego añada las colecciones.', 'warning')
+                    return redirect(url_for('main.index'))
+            else: # Append
+                if sheet_to_import == 'Juegos':
                     for item in new_data_rows:
                         juego = item.get('Juego')
                         if not juego: continue
@@ -163,78 +164,75 @@ def import_excel():
                             data['juegos'][juego] = {'color': item.get('Color', ''), 'colecciones': []}
                         else:
                             data['juegos'][juego]['color'] = item.get('Color', data['juegos'][juego].get('color', ''))
-                 elif sheet_to_import == 'Colecciones':
+                elif sheet_to_import == 'Colecciones':
                     for item in new_data_rows:
-                        juego = item.get('Juego')
-                        coleccion = item.get('Coleccion')
+                        juego, coleccion = item.get('Juego'), item.get('Coleccion')
                         if not juego or not coleccion: continue
                         if juego in data['juegos'] and coleccion not in data['juegos'][juego]['colecciones']:
                             data['juegos'][juego]['colecciones'].append(coleccion)
-            save_data('juegos_colecciones.json', data)
+            
+            JUEGOS_COLECCIONES_COLLECTION.delete_many({})
+            JUEGOS_COLECCIONES_COLLECTION.insert_one(data)
 
         # Lógica para hojas estándar
         else:
-            source_map = {'Clientes': 'clientes.json', 'Eventos': 'eventos.json', 'Lanzamientos': 'lanzamientos.json', 'Reservas': 'reservas.json'}
-            json_filename = source_map.get(sheet_to_import)
+            collection_map = {
+                'Clientes': (CLIENTES_COLLECTION, crear_cliente),
+                'Eventos': (EVENTOS_COLLECTION, crear_evento),
+                'Lanzamientos': (LANZAMIENTOS_COLLECTION, crear_lanzamiento)
+            }
             
-            if json_filename:
-                if sheet_to_import == 'Reservas':
-                    clientes_data = load_data('clientes.json')
-                    lanzamientos_data = load_data('lanzamientos.json')
-                    eventos_data = load_data('eventos.json')
+            if sheet_to_import in collection_map:
+                collection, create_fn = collection_map[sheet_to_import]
+                if import_mode == 'overwrite':
+                    collection.delete_many({})
+                
+                for item_data in new_data_rows:
+                    # Filtrar claves con valores None para no pasarlas a la función de creación
+                    filtered_data = {k: v for k, v in item_data.items() if v is not None}
+                    create_fn(**filtered_data)
+
+            elif sheet_to_import == 'Reservas':
+                if import_mode == 'overwrite':
+                    RESERVAS_COLLECTION.delete_many({})
+                
+                clientes_map = {c['telefono']: c['id'] for c in obtener_clientes_todos()}
+                lanzamientos_map = {(l['nombre'], l.get('juego', ''), l.get('coleccion', '')): l['id'] for l in obtener_lanzamientos_todos()}
+                eventos_map = {(e['nombre'], e.get('juego', ''), e.get('coleccion', '')): e['id'] for e in obtener_eventos_todos()}
+
+                for item in new_data_rows:
+                    cliente_id = clientes_map.get(str(item.get('telefono_cliente')))
+                    if not cliente_id:
+                        flash(f"Cliente con teléfono {item.get('telefono_cliente')} no encontrado. Saltando reserva.", 'warning')
+                        continue
+
+                    lanzamiento_id, evento_id = None, None
+                    item_key = (item.get('nombre'), item.get('juego', ''), item.get('coleccion', ''))
                     
-                    clientes_tel_map = {c['telefono']: c['id'] for c in clientes_data}
+                    if item.get('tipo') == 'Evento':
+                        evento_id = eventos_map.get(item_key)
+                    else: # Asumir Lanzamiento por defecto
+                        lanzamiento_id = lanzamientos_map.get(item_key)
+
+                    if not lanzamiento_id and not evento_id:
+                        flash(f"Producto no encontrado para la reserva: {item_key}. Saltando.", 'warning')
+                        continue
                     
-                    # Create maps for finding items by their properties
-                    lanzamientos_prop_map = {(l.get('tipo'), l.get('nombre'), l.get('juego'), l.get('coleccion')): l['id'] for l in lanzamientos_data}
-                    eventos_prop_map = {(e.get('tipo'), e.get('nombre'), e.get('juego'), e.get('coleccion')): e['id'] for e in eventos_data}
-
-                    processed_reservas = []
-                    existing_data = load_data(json_filename) if import_mode == 'append' else []
-                    max_id = max([int(r['id']) for r in existing_data]) if existing_data else 0
-
-                    for item in new_data_rows:
-                        cliente_id = clientes_tel_map.get(item.get('telefono_cliente'))
-                        if not cliente_id:
-                            flash(f"Cliente con teléfono {item.get('telefono_cliente')} no encontrado. Saltando reserva.", 'warning')
-                            continue
-
-                        product_key = (item.get('tipo'), item.get('nombre'), item.get('juego'), item.get('coleccion'))
-                        lanzamiento_id = lanzamientos_prop_map.get(product_key)
-                        evento_id = eventos_prop_map.get(product_key)
-
-                        if not lanzamiento_id and not evento_id:
-                            flash(f"Producto no encontrado para la reserva: {product_key}. Saltando.", 'warning')
-                            continue
-                        
-                        max_id += 1
-                        new_reserva = {
-                            "id": str(max_id),
-                            "cliente_id": cliente_id,
-                            "lanzamiento_id": lanzamiento_id,
-                            "evento_id": evento_id,
-                            "cantidad": item.get('cantidad'),
-                            "fecha_reserva": item.get('fecha_reserva', ''),
-                            "estado": item.get('estado'),
-                            "pagado": item.get('pagado'),
-                            "tipo_pago": item.get('tipo_pago'),
-                            "notas": item.get('notas', '')
-                        }
-                        processed_reservas.append(new_reserva)
-                    
-                    if import_mode == 'overwrite':
-                        save_data(json_filename, processed_reservas)
-                    else: # append
-                        combined_data = existing_data + processed_reservas
-                        save_data(json_filename, combined_data)
-
-                elif import_mode == 'overwrite':
-                    save_data(json_filename, new_data_rows)
-                else: # Append for Clientes, Eventos, Lanzamientos
-                    existing_data = load_data(json_filename)
-                    # This simple append might create duplicates. For a real-world scenario, you'd want to check for existing records.
-                    combined_data = existing_data + new_data_rows
-                    save_data(json_filename, combined_data)
+                    reserva_data = {
+                        'cliente_id': cliente_id,
+                        'lanzamiento_id': lanzamiento_id,
+                        'evento_id': evento_id,
+                        'cantidad': item.get('cantidad'),
+                        'fecha_reserva': item.get('fecha_reserva'),
+                        'estado': item.get('estado'),
+                        'pagado': item.get('pagado'),
+                        'tipo_pago': item.get('tipo_pago'),
+                        'notas': item.get('notas')
+                    }
+                    crear_reserva(**{k: v for k, v in reserva_data.items() if v is not None})
+            else:
+                flash(f"La importación para la hoja '{sheet_to_import}' no está implementada.", 'danger')
+                return redirect(url_for('main.index'))
 
         flash(f'Datos de la hoja "{sheet_to_import}" importados correctamente en modo "{import_mode}".', 'success')
 
@@ -242,4 +240,3 @@ def import_excel():
         flash(f'Error al procesar el fichero Excel: {e}', 'danger')
 
     return redirect(url_for('main.index'))
-"""

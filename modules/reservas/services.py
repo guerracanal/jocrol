@@ -1,33 +1,28 @@
-from data.data_manager import cargar_datos, guardar_datos, RESERVAS_FILE, CLIENTES_FILE, LANZAMIENTOS_FILE, EVENTOS_FILE
+from data.data_manager import RESERVAS_COLLECTION, CLIENTES_COLLECTION, LANZAMIENTOS_COLLECTION, EVENTOS_COLLECTION
 from datetime import datetime
 import uuid
+from bson.objectid import ObjectId
 
 def generar_id():
     return str(uuid.uuid4())
 
 def obtener_reservas_todas():
-    return cargar_datos(RESERVAS_FILE)
+    return list(RESERVAS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_clientes_todos():
-    return cargar_datos(CLIENTES_FILE)
+    return list(CLIENTES_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_lanzamientos_todos():
-    return cargar_datos(LANZAMIENTOS_FILE)
+    return list(LANZAMIENTOS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_eventos_todos():
-    return cargar_datos(EVENTOS_FILE)
+    return list(EVENTOS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_reserva_por_id(reserva_id):
-    reservas = obtener_reservas_todas()
-    for r in reservas:
-        if r.get('id') == reserva_id:
-            return r
-    return None
+    return RESERVAS_COLLECTION.find_one({'id': reserva_id}, {'_id': 0})
 
 def crear_reserva(datos_reserva):
-    reservas = obtener_reservas_todas()
     nuevo_id = generar_id()
-    
     pagado_monto = float(datos_reserva.get('pagado', 0) or 0)
 
     reserva = {
@@ -43,121 +38,164 @@ def crear_reserva(datos_reserva):
         "notas": datos_reserva.get('notas'),
         "pago_completo": False
     }
-    reservas.append(reserva)
-    guardar_datos(RESERVAS_FILE, reservas)
+    RESERVAS_COLLECTION.insert_one(reserva)
 
 def actualizar_reserva(reserva_id, datos_reserva):
-    reservas = obtener_reservas_todas()
-    reserva_actualizada = False
-    for i, r in enumerate(reservas):
-        if r.get('id') == reserva_id:
-            reservas[i]['cliente_id'] = datos_reserva.get('cliente_id')
-            
-            tipo_producto = datos_reserva.get('tipo_producto')
-            if tipo_producto == 'lanzamiento':
-                reservas[i]['lanzamiento_id'] = datos_reserva.get('producto_id')
-                reservas[i]['evento_id'] = None
-            elif tipo_producto == 'evento':
-                reservas[i]['evento_id'] = datos_reserva.get('producto_id')
-                reservas[i]['lanzamiento_id'] = None
-            
-            reservas[i]['cantidad'] = int(datos_reserva.get('cantidad') or 1)
-            reservas[i]['estado'] = datos_reserva.get('estado', r.get('estado'))
-            
-            pagado_val = datos_reserva.get('pagado')
-            if pagado_val is not None and pagado_val != '':
-                reservas[i]['pagado'] = float(pagado_val)
-            else:
-                reservas[i]['pagado'] = 0
-            
-            reservas[i]['tipo_pago'] = datos_reserva.get('tipo_pago')
-            reservas[i]['notas'] = datos_reserva.get('notas')
+    update_fields = {
+        'cliente_id': datos_reserva.get('cliente_id'),
+        'cantidad': int(datos_reserva.get('cantidad') or 1),
+        'estado': datos_reserva.get('estado'),
+        'tipo_pago': datos_reserva.get('tipo_pago'),
+        'notas': datos_reserva.get('notas')
+    }
 
-            item_id = reservas[i].get('lanzamiento_id') or reservas[i].get('evento_id')
-            item = None
-            if reservas[i].get('lanzamiento_id'):
-                item = next((l for l in obtener_lanzamientos_todos() if l['id'] == item_id), None)
-            elif reservas[i].get('evento_id'):
-                item = next((e for e in obtener_eventos_todos() if e['id'] == item_id), None)
-            
-            if item:
-                precio = float(item.get('precio', 0))
-                precio_reserva = float(item.get('precio_reserva', 0))
-                cantidad = int(reservas[i]['cantidad'])
-                total = (precio * cantidad) + precio_reserva
-                reservas[i]['pago_completo'] = float(reservas[i]['pagado']) >= total
+    tipo_producto = datos_reserva.get('tipo_producto')
+    if tipo_producto == 'lanzamiento':
+        update_fields['lanzamiento_id'] = datos_reserva.get('producto_id')
+        update_fields['evento_id'] = None
+    elif tipo_producto == 'evento':
+        update_fields['evento_id'] = datos_reserva.get('producto_id')
+        update_fields['lanzamiento_id'] = None
 
-            reserva_actualizada = True
-            break
-    if not reserva_actualizada:
+    pagado_val = datos_reserva.get('pagado')
+    if pagado_val is not None and pagado_val != '':
+        update_fields['pagado'] = float(pagado_val)
+    else:
+        update_fields['pagado'] = 0
+
+    reserva_actual = RESERVAS_COLLECTION.find_one({'id': reserva_id})
+    if not reserva_actual:
         raise ValueError(f"No se encontró la reserva con ID {reserva_id}")
-    guardar_datos(RESERVAS_FILE, reservas)
 
-def eliminar_reserva(reserva_id):
-    reservas = obtener_reservas_todas()
-    if not any(r['id'] == reserva_id for r in reservas):
-        raise ValueError(f"No se encontró la reserva con ID {reserva_id}")
+    item_id = update_fields.get('lanzamiento_id') or update_fields.get('evento_id')
+    item = None
+    if update_fields.get('lanzamiento_id'):
+        item = LANZAMIENTOS_COLLECTION.find_one({'id': item_id})
+    elif update_fields.get('evento_id'):
+        item = EVENTOS_COLLECTION.find_one({'id': item_id})
     
-    reservas_actualizadas = [r for r in reservas if r['id'] != reserva_id]
-    guardar_datos(RESERVAS_FILE, reservas_actualizadas)
-
-def obtener_reservas_filtradas(filters):
-    reservas_raw = obtener_reservas_todas()
-    clientes = {c['id']: c for c in obtener_clientes_todos()}
-    lanzamientos = {l['id']: l for l in obtener_lanzamientos_todos()}
-    eventos = {e['id']: e for e in obtener_eventos_todos()}
-
-    reservas_enriquecidas = []
-    total_pendiente_general = 0
-
-    for r in reservas_raw:
-        item_id = r.get('lanzamiento_id') or r.get('evento_id')
-        item = None
-        if r.get('lanzamiento_id'):
-            item = lanzamientos.get(item_id)
-        elif r.get('evento_id'):
-            item = eventos.get(item_id)
-
-        cliente = clientes.get(r.get('cliente_id'))
-
-        if not item or not cliente:
-            continue
-
-        r['item'] = item
-        r['cliente'] = cliente
-
+    if item:
         precio = float(item.get('precio', 0))
         precio_reserva = float(item.get('precio_reserva', 0))
-        cantidad = int(r.get('cantidad', 1))
+        cantidad = int(update_fields['cantidad'])
         total = (precio * cantidad) + precio_reserva
-        pagado = float(r.get('pagado', r.get('pagado_cantidad', 0)))
-        pendiente = total - pagado
+        update_fields['pago_completo'] = float(update_fields['pagado']) >= total
 
-        r['total'] = total
-        r['pendiente'] = pendiente
-        r['pagado'] = pagado
-        r['pago_completo'] = pagado >= total
-        
-        q = filters.get('q', '').lower()
-        start_date = filters.get('start_date')
-        end_date = filters.get('end_date')
-        payment_status = filters.get('payment_status')
+    result = RESERVAS_COLLECTION.update_one({'id': reserva_id}, {'$set': update_fields})
+    if result.matched_count == 0:
+        raise ValueError(f"No se encontró la reserva con ID {reserva_id}")
 
-        match = True
-        if q and not (q in cliente['nombre'].lower() or q in item['nombre'].lower()):
-            match = False
-        if start_date and r.get('fecha_reserva') < start_date:
-            match = False
-        if end_date and r.get('fecha_reserva') > end_date:
-            match = False
-        if payment_status == 'pagado' and not r['pago_completo']:
-            match = False
-        if payment_status == 'pendiente' and r['pago_completo']:
-            match = False
+def eliminar_reserva(reserva_id):
+    result = RESERVAS_COLLECTION.delete_one({'id': reserva_id})
+    if result.deleted_count == 0:
+        raise ValueError(f"No se encontró la reserva con ID {reserva_id}")
+
+def obtener_reservas_filtradas(filters):
+    pipeline = []
+
+    # Match stage for filtering
+    match_stage = {}
+    q = filters.get('q', '').lower()
+    start_date = filters.get('start_date')
+    end_date = filters.get('end_date')
+    
+    if start_date:
+        match_stage['fecha_reserva'] = {'$gte': start_date}
+    if end_date:
+        if 'fecha_reserva' in match_stage:
+            match_stage['fecha_reserva']['$lte'] = end_date
+        else:
+            match_stage['fecha_reserva'] = {'$lte': end_date}
+
+    if match_stage:
+        pipeline.append({'$match': match_stage})
+
+    # Lookup stage for cliente
+    pipeline.append({
+        '$lookup': {
+            'from': 'clientes',
+            'localField': 'cliente_id',
+            'foreignField': 'id',
+            'as': 'cliente'
+        }
+    })
+    pipeline.append({'$unwind': '$cliente'})
+
+    # Lookup stage for lanzamientos
+    pipeline.append({
+        '$lookup': {
+            'from': 'lanzamientos',
+            'localField': 'lanzamiento_id',
+            'foreignField': 'id',
+            'as': 'lanzamiento_item'
+        }
+    })
+    
+    # Lookup stage for eventos
+    pipeline.append({
+        '$lookup': {
+            'from': 'eventos',
+            'localField': 'evento_id',
+            'foreignField': 'id',
+            'as': 'evento_item'
+        }
+    })
+
+    # Add fields for item
+    pipeline.append({
+        '$addFields': {
+            'item': {
+                '$cond': {
+                    'if': {'$gt': [{'$size': '$lanzamiento_item'}, 0]},
+                    'then': {'$arrayElemAt': ['$lanzamiento_item', 0]},
+                    'else': {'$arrayElemAt': ['$evento_item', 0]}
+                }
+            }
+        }
+    })
+
+    # Filter by query on cliente and item name
+    if q:
+        pipeline.append({
+            '$match': {
+                '$or': [
+                    {'cliente.nombre': {'$regex': q, '$options': 'i'}},
+                    {'item.nombre': {'$regex': q, '$options': 'i'}}
+                ]
+            }
+        })
+    
+    # Add fields for total, pendiente, pagado, and pago_completo
+    pipeline.append({
+        '$addFields': {
+            'total': {
+                '$add': [
+                    {'$multiply': [{'$toDouble': '$item.precio'}, {'$toInt': '$cantidad'}]},
+                    {'$toDouble': '$item.precio_reserva'}
+                ]
+            },
+            'pagado': {'$toDouble': '$pagado'}
+        }
+    })
+    pipeline.append({
+        '$addFields': {
+            'pendiente': {'$subtract': ['$total', '$pagado']},
+            'pago_completo': {'$gte': ['$pagado', '$total']}
+        }
+    })
+
+    # Filter by payment_status
+    payment_status = filters.get('payment_status')
+    if payment_status == 'pagado':
+        pipeline.append({'$match': {'pago_completo': True}})
+    elif payment_status == 'pendiente':
+        pipeline.append({'$match': {'pago_completo': False}})
         
-        if match:
-            reservas_enriquecidas.append(r)
-            if not r['pago_completo']:
-                total_pendiente_general += pendiente
+    # Projection to remove temp fields
+    pipeline.append({'$project': {'lanzamiento_item': 0, 'evento_item': 0, '_id':0}})
+
+    reservas_enriquecidas = list(RESERVAS_COLLECTION.aggregate(pipeline))
+
+    total_pendiente_general = sum(r['pendiente'] for r in reservas_enriquecidas if not r['pago_completo'])
 
     return reservas_enriquecidas, total_pendiente_general

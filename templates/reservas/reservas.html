@@ -92,14 +92,14 @@
                             </span>
                         </td>
                         <td>
-                            {% if reserva.pendiente <= 0 %}
+                            {% if (reserva.pendiente or 0) <= 0 %}
                                 <i class="bi bi-check-circle-fill text-success"></i>
                             {% else %}
                                 <i class="bi bi-x-circle-fill text-danger"></i>
                             {% endif %}
                         </td>
-                        <td>{{ "%.2f" | format(reserva.pagado) }} €</td>
-                        <td class="text-danger">{{ "%.2f" | format(reserva.pendiente) }} €</td>
+                        <td>{{ "%.2f" | format(reserva.pagado or 0) }} €</td>
+                        <td class="text-danger">{{ "%.2f" | format(reserva.pendiente or 0) }} €</td>
                         <td>{{ reserva.tipo_pago or '-' }}</td>
                         <td>{{ reserva.notas or '-' }}</td>
                         <td>

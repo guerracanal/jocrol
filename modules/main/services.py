@@ -1,9 +1,8 @@
 from data.data_manager import (
-    cargar_datos, 
-    LANZAMIENTOS_FILE, 
-    EVENTOS_FILE, 
-    cargar_juegos_colecciones
+    LANZAMIENTOS_COLLECTION,
+    EVENTOS_COLLECTION
 )
+from modules.eventos.services import obtener_juegos_y_colecciones
 
 def adjust_color_brightness(hex_color, factor):
     """
@@ -24,9 +23,9 @@ def adjust_color_brightness(hex_color, factor):
 
 def obtener_eventos_calendario():
     try:
-        lanzamientos = cargar_datos(LANZAMIENTOS_FILE)
-        eventos_data = cargar_datos(EVENTOS_FILE)
-        juegos_data = cargar_juegos_colecciones().get('juegos', {})
+        lanzamientos = list(LANZAMIENTOS_COLLECTION.find({}, {'_id': 0}))
+        eventos_data = list(EVENTOS_COLLECTION.find({}, {'_id': 0}))
+        juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
 
         eventos_calendario = []
 
@@ -62,7 +61,7 @@ def obtener_eventos_calendario():
                     'juego_color': juego_color,
                     'coleccion_color': coleccion_color,
                     'precio': lanz.get('precio'),
-                    'reserva': lanz.get('reserva'),
+                    'reserva': lanz.get('precio_reserva'),
                     'comentario': lanz.get('comentario'),
                     'fecha_envio': lanz.get('fecha_envio'),
                     'fecha_salida': lanz.get('fecha_salida')
@@ -84,7 +83,7 @@ def obtener_eventos_calendario():
                         'juego_color': juego_color,
                         'coleccion_color': coleccion_color,
                         'precio': lanz.get('precio'),
-                        'reserva': lanz.get('reserva'),
+                        'reserva': lanz.get('precio_reserva'),
                         'comentario': lanz.get('comentario'),
                         'fecha_salida': lanz.get('fecha_salida'),
                         'fecha_envio': lanz.get('fecha_envio')
@@ -123,7 +122,7 @@ def obtener_eventos_calendario():
                     'juego_color': juego_color,
                     'coleccion_color': coleccion_color,
                     'precio': ev.get('precio'),
-                    'reserva': ev.get('reserva'),
+                    'reserva': ev.get('precio_reserva'),
                     'comentario': ev.get('comentario'),
                     'fecha': ev.get('fecha')
                 }

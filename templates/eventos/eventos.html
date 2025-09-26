@@ -49,8 +49,8 @@
                 </span>
             </td>
             <td>{{ evento.fecha | formato_fecha }}</td>
-            <td>{{ "%.2f"|format(evento.precio) }}€</td>
-            <td>{{ "%.2f"|format(evento.reserva) }}€</td>
+            <td>{{ "%.2f"|format(evento.precio or 0) }}€</td>
+            <td>{{ "%.2f"|format(evento.precio_reserva or 0) }}€</td>
             <td>{{ evento.comentario }}</td>
             <td>
                 <a href="{{ url_for('eventos.editar_evento', evento_id=evento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>

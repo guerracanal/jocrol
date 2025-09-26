@@ -1,10 +1,8 @@
 from data.data_manager import (
-    cargar_datos, 
-    guardar_datos, 
-    LANZAMIENTOS_FILE, 
-    RESERVAS_FILE, 
-    CLIENTES_FILE, 
-    cargar_juegos_colecciones
+    LANZAMIENTOS_COLLECTION, 
+    RESERVAS_COLLECTION, 
+    CLIENTES_COLLECTION, 
+    JUEGOS_COLECCIONES_COLLECTION
 )
 from collections import defaultdict
 from datetime import datetime
@@ -31,71 +29,95 @@ def generar_id():
     return str(uuid.uuid4())
 
 def obtener_juegos_y_colecciones():
-    return cargar_juegos_colecciones()
+    juegos_list = list(JUEGOS_COLECCIONES_COLLECTION.find({}, {'_id': 0}))
+    juegos_dict = {
+        juego['nombre']: {
+            'color': juego['color'],
+            'colecciones': juego['colecciones']
+        }
+        for juego in juegos_list
+    }
+    return {'juegos': juegos_dict}
 
 def obtener_lanzamientos_todos():
-    return cargar_datos(LANZAMIENTOS_FILE)
+    return list(LANZAMIENTOS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_reservas_todas():
-    return cargar_datos(RESERVAS_FILE)
+    return list(RESERVAS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_clientes_todos():
-    return cargar_datos(CLIENTES_FILE)
+    return list(CLIENTES_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_lanzamiento_por_id(lanzamiento_id):
-    lanzamiento = next((l for l in obtener_lanzamientos_todos() if l.get('id') == lanzamiento_id), None)
+    lanzamiento = LANZAMIENTOS_COLLECTION.find_one({'id': lanzamiento_id}, {'_id': 0})
     if lanzamiento:
-        juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
-        juego_nombre = lanzamiento.get('juego')
-        if juego_nombre and juego_nombre in juegos_data:
-            lanzamiento['juego_color'] = juegos_data[juego_nombre].get('color', '#6c757d')
+        juego_info = JUEGOS_COLECCIONES_COLLECTION.find_one({'nombre': lanzamiento.get('juego')}, {'_id': 0})
+        if juego_info:
+            lanzamiento['juego_color'] = juego_info.get('color', '#6c757d')
         else:
             lanzamiento['juego_color'] = '#6c757d'
     return lanzamiento
 
 def obtener_lanzamientos_filtrados(filters):
-    lanzamientos_todos = obtener_lanzamientos_todos()
-    reservas = obtener_reservas_todas()
-    clientes = {c['id']: c for c in obtener_clientes_todos()}
-    juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
-
-    lanzamientos_filtrados = lanzamientos_todos
+    pipeline = []
+    match_stage = {}
 
     q = filters.get('q')
     if q:
         q = q.lower()
-        lanzamientos_filtrados = [
-            l for l in lanzamientos_filtrados 
-            if q in l.get('nombre', '').lower() or \
-               q in l.get('coleccion', '').lower() or \
-               q in l.get('juego', '').lower()
+        match_stage['$or'] = [
+            {'nombre': {'$regex': q, '$options': 'i'}},
+            {'coleccion': {'$regex': q, '$options': 'i'}},
+            {'juego': {'$regex': q, '$options': 'i'}}
         ]
-    
-    juego_filter = filters.get('juego')
-    if juego_filter:
-        lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('juego') == juego_filter]
+
+    if filters.get('juego'):
+        match_stage['juego'] = filters.get('juego')
 
     if filters.get('start_date'):
-        lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('fecha_salida') >= filters['start_date']]
+        match_stage['fecha_salida'] = {'$gte': filters.get('start_date')}
 
     if filters.get('end_date'):
-        lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('fecha_salida') <= filters['end_date']]
+        if 'fecha_salida' not in match_stage:
+            match_stage['fecha_salida'] = {}
+        match_stage['fecha_salida']['$lte'] = filters.get('end_date')
 
     if filters.get('hide_past') == 'on':
         today = datetime.now().strftime('%Y-%m-%d')
-        lanzamientos_filtrados = [l for l in lanzamientos_filtrados if l.get('fecha_salida') >= today]
+        if 'fecha_salida' not in match_stage:
+            match_stage['fecha_salida'] = {}
+        match_stage['fecha_salida']['$gte'] = today
 
-    sort_by = filters.get('sort_by', 'fecha_salida')
-    sort_order = filters.get('sort_order', 'asc')
-    reverse = sort_order == 'desc'
-    
-    lanzamientos_filtrados.sort(key=lambda x: (x.get(sort_by) is None, x.get(sort_by, 0)), reverse=reverse)
+    if match_stage:
+        pipeline.append({'$match': match_stage})
+
+    sort_by = filters.get('sort_by') or 'fecha_salida'
+    sort_order = 1 if filters.get('sort_order', 'asc') == 'asc' else -1
+    pipeline.append({'$sort': {sort_by: sort_order, '_id': 1}})
+
+    lanzamientos_filtrados = list(LANZAMIENTOS_COLLECTION.aggregate(pipeline))
+    lanz_ids = [l['id'] for l in lanzamientos_filtrados]
 
     reservas_por_lanzamiento = defaultdict(list)
-    for res in reservas:
-        res['cliente'] = clientes.get(res.get('cliente_id'))
-        reservas_por_lanzamiento[res.get('lanzamiento_id')].append(res)
+    cliente_ids = set()
+    if lanz_ids:
+        reservas_cursor = RESERVAS_COLLECTION.find({'lanzamiento_id': {'$in': lanz_ids}})
+        for r in reservas_cursor:
+            reservas_por_lanzamiento[r['lanzamiento_id']].append(r)
+            if r.get('cliente_id'):
+                cliente_ids.add(r['cliente_id'])
 
+    clientes_map = {}
+    if cliente_ids:
+        clientes_cursor = CLIENTES_COLLECTION.find({'id': {'$in': list(cliente_ids)}})
+        clientes_map = {c['id']: c for c in clientes_cursor}
+
+    for lanz_id, reservas in reservas_por_lanzamiento.items():
+        for r in reservas:
+            if r.get('cliente_id') in clientes_map:
+                r['cliente'] = clientes_map[r['cliente_id']]
+
+    juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
     for lanz in lanzamientos_filtrados:
         lanz['reservas'] = reservas_por_lanzamiento.get(lanz.get('id'), [])
         juego_nombre = lanz.get('juego')
@@ -123,7 +145,6 @@ def obtener_lanzamientos_filtrados(filters):
     return lanzamientos_filtrados, juegos_data
 
 def crear_lanzamiento(datos_lanzamiento):
-    lanzamientos = obtener_lanzamientos_todos()
     nuevo_id = generar_id()
     lanzamiento = {
         "id": nuevo_id,
@@ -136,32 +157,26 @@ def crear_lanzamiento(datos_lanzamiento):
         "precio_reserva": float(datos_lanzamiento.get('precio_reserva') or 0),
         "comentario": datos_lanzamiento.get('comentario'),
     }
-    lanzamientos.append(lanzamiento)
-    guardar_datos(LANZAMIENTOS_FILE, lanzamientos)
+    LANZAMIENTOS_COLLECTION.insert_one(lanzamiento)
 
 def actualizar_lanzamiento(lanzamiento_id, datos_lanzamiento):
-    lanzamientos = obtener_lanzamientos_todos()
-    for i, lanz in enumerate(lanzamientos):
-        if lanz.get('id') == lanzamiento_id:
-            lanzamientos[i] = {
-                "id": lanzamiento_id,
-                "nombre": datos_lanzamiento.get('nombre'),
-                "juego": datos_lanzamiento.get('juego'),
-                "coleccion": datos_lanzamiento.get('coleccion'),
-                "fecha_salida": datos_lanzamiento.get('fecha_salida'),
-                "fecha_envio": datos_lanzamiento.get('fecha_envio'),
-                "precio": float(datos_lanzamiento.get('precio') or 0),
-                "precio_reserva": float(datos_lanzamiento.get('precio_reserva') or 0),
-                "comentario": datos_lanzamiento.get('comentario'),
-            }
-            break
-    guardar_datos(LANZAMIENTOS_FILE, lanzamientos)
+    update_data = {
+        "nombre": datos_lanzamiento.get('nombre'),
+        "juego": datos_lanzamiento.get('juego'),
+        "coleccion": datos_lanzamiento.get('coleccion'),
+        "fecha_salida": datos_lanzamiento.get('fecha_salida'),
+        "fecha_envio": datos_lanzamiento.get('fecha_envio'),
+        "precio": float(datos_lanzamiento.get('precio') or 0),
+        "precio_reserva": float(datos_lanzamiento.get('precio_reserva') or 0),
+        "comentario": datos_lanzamiento.get('comentario'),
+    }
+    result = LANZAMIENTOS_COLLECTION.update_one({'id': lanzamiento_id}, {'$set': update_data})
+    if result.matched_count == 0:
+        raise ValueError(f"No se encontró el lanzamiento con ID {lanzamiento_id}")
 
 def eliminar_lanzamiento(lanzamiento_id):
-    lanzamientos = obtener_lanzamientos_todos()
-    lanzamientos_filtrados = [l for l in lanzamientos if l.get('id') != lanzamiento_id]
-    guardar_datos(LANZAMIENTOS_FILE, lanzamientos_filtrados)
-
-    reservas = obtener_reservas_todas()
-    reservas_filtradas = [r for r in reservas if r.get('lanzamiento_id') != lanzamiento_id]
-    guardar_datos(RESERVAS_FILE, reservas_filtradas)
+    delete_result = LANZAMIENTOS_COLLECTION.delete_one({'id': lanzamiento_id})
+    if delete_result.deleted_count == 0:
+        raise ValueError(f"No se encontró el lanzamiento con ID {lanzamiento_id}")
+    
+    RESERVAS_COLLECTION.delete_many({'lanzamiento_id': lanzamiento_id})

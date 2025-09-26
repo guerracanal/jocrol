@@ -9,3 +9,5 @@ load_dotenv()
 
 # La SECRET_KEY se carga desde el archivo .env
 SECRET_KEY = os.getenv('SECRET_KEY')
+
+MONGO_URI = os.getenv('MONGO_URI')

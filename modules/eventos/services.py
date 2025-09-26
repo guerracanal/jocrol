@@ -1,8 +1,7 @@
 from data.data_manager import (
-    cargar_datos, 
-    guardar_datos, 
-    EVENTOS_FILE,
-    cargar_juegos_colecciones
+    EVENTOS_COLLECTION,
+    JUEGOS_COLECCIONES_COLLECTION,
+    RESERVAS_COLLECTION
 )
 import uuid
 
@@ -27,26 +26,40 @@ def generar_id():
     return str(uuid.uuid4())
 
 def obtener_juegos_y_colecciones():
-    return cargar_juegos_colecciones()
+    juegos_list = list(JUEGOS_COLECCIONES_COLLECTION.find({}, {'_id': 0}))
+    juegos_dict = {
+        juego['nombre']: {
+            'color': juego['color'],
+            'colecciones': juego['colecciones']
+        }
+        for juego in juegos_list
+    }
+    return {'juegos': juegos_dict}
 
 def obtener_eventos_todos():
-    return cargar_datos(EVENTOS_FILE)
+    return list(EVENTOS_COLLECTION.find({}, {'_id': 0}))
 
 def obtener_eventos_filtrados(filters):
-    eventos_todos = obtener_eventos_todos()
-    juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
-    
-    eventos_filtrados = eventos_todos
-
+    pipeline = []
+    match_stage = {}
     q = filters.get('q')
     if q:
         q = q.lower()
-        eventos_filtrados = [
-            e for e in eventos_filtrados 
-            if q in e.get('nombre', '').lower() or \
-               q in e.get('coleccion', '').lower() or \
-               q in e.get('juego', '').lower()
+        match_stage['$or'] = [
+            {'nombre': {'$regex': q, '$options': 'i'}},
+            {'coleccion': {'$regex': q, '$options': 'i'}},
+            {'juego': {'$regex': q, '$options': 'i'}}
         ]
+    
+    if match_stage:
+        pipeline.append({'$match': match_stage})
+
+    pipeline.append({'$sort': {'fecha': -1, '_id': 1}})
+    pipeline.append({'$project': {'_id': 0}})
+
+    eventos_filtrados = list(EVENTOS_COLLECTION.aggregate(pipeline))
+    
+    juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
     
     for evento in eventos_filtrados:
         juego_nombre = evento.get('juego')
@@ -71,12 +84,10 @@ def obtener_eventos_filtrados(filters):
             evento['juego_color'] = '#6c757d'
             evento['coleccion_color'] = '#6c757d'
             
-    eventos_filtrados.sort(key=lambda x: x.get('fecha') or '', reverse=True)
-    
     return eventos_filtrados
 
 def obtener_evento_por_id(evento_id):
-    evento = next((e for e in obtener_eventos_todos() if e.get('id') == evento_id), None)
+    evento = EVENTOS_COLLECTION.find_one({'id': evento_id}, {'_id': 0})
     if evento:
         juegos_data = obtener_juegos_y_colecciones().get('juegos', {})
         juego_nombre = evento.get('juego')
@@ -104,7 +115,6 @@ def obtener_evento_por_id(evento_id):
     return evento
 
 def crear_evento(datos_evento):
-    eventos = obtener_eventos_todos()
     nuevo_id = generar_id()
     evento = {
         "id": nuevo_id,
@@ -113,30 +123,32 @@ def crear_evento(datos_evento):
         "coleccion": datos_evento.get('coleccion'),
         "fecha_salida": datos_evento.get('fecha_salida'),
         "precio": float(datos_evento.get('precio') or 0),
-        "reserva": float(datos_evento.get('reserva') or 0),
+        "precio_reserva": float(datos_evento.get('reserva') or 0),
         "tipo": "Evento",
         "comentario": datos_evento.get('comentario', ''),
         "fecha": datos_evento.get('fecha_salida')
     }
-    eventos.append(evento)
-    guardar_datos(EVENTOS_FILE, eventos)
+    EVENTOS_COLLECTION.insert_one(evento)
 
 def actualizar_evento(evento_id, datos_evento):
-    eventos = obtener_eventos_todos()
-    for i, e in enumerate(eventos):
-        if e.get('id') == evento_id:
-            e['nombre'] = datos_evento.get('nombre', e.get('nombre'))
-            e['juego'] = datos_evento.get('juego', e.get('juego'))
-            e['coleccion'] = datos_evento.get('coleccion', e.get('coleccion'))
-            e['fecha_salida'] = datos_evento.get('fecha_salida', e.get('fecha_salida'))
-            e['precio'] = float(datos_evento.get('precio') or e.get('precio') or 0)
-            e['reserva'] = float(datos_evento.get('reserva') or e.get('reserva') or 0)
-            e['comentario'] = datos_evento.get('comentario', e.get('comentario'))
-            e['fecha'] = datos_evento.get('fecha_salida', e.get('fecha_salida'))
-            break
-    guardar_datos(EVENTOS_FILE, eventos)
+    update_data = {
+        'nombre': datos_evento.get('nombre'),
+        'juego': datos_evento.get('juego'),
+        'coleccion': datos_evento.get('coleccion'),
+        'fecha_salida': datos_evento.get('fecha_salida'),
+        'precio': float(datos_evento.get('precio') or 0),
+        'precio_reserva': float(datos_evento.get('reserva') or 0),
+        'comentario': datos_evento.get('comentario', ''),
+        'fecha': datos_evento.get('fecha_salida')
+    }
+    result = EVENTOS_COLLECTION.update_one({'id': evento_id}, {'$set': update_data})
+    if result.matched_count == 0:
+        raise ValueError(f"No se encontró el evento con ID {evento_id}")
 
 def eliminar_evento(evento_id):
-    eventos = obtener_eventos_todos()
-    eventos_filtrados = [e for e in eventos if e.get('id') != evento_id]
-    guardar_datos(EVENTOS_FILE, eventos_filtrados)
+    if RESERVAS_COLLECTION.find_one({'evento_id': evento_id}):
+        raise ValueError("No se puede eliminar un evento que tiene reservas asociadas.")
+        
+    result = EVENTOS_COLLECTION.delete_one({'id': evento_id})
+    if result.deleted_count == 0:
+        raise ValueError(f"No se encontró el evento con ID {evento_id}")

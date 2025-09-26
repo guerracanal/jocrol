@@ -96,10 +96,10 @@
                     </a>
                 </th>
                 <th>
-                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'reserva' and request.args.get('sort_order') == 'asc' else 'asc' %}
-                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='reserva', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
+                    {% set sort_order_next = 'desc' if request.args.get('sort_by') == 'precio_reserva' and request.args.get('sort_order') == 'asc' else 'asc' %}
+                    <a href="{{ url_for('lanzamientos.listar_lanzamientos', **dict(request.args, sort_by='precio_reserva', sort_order=sort_order_next)) }}" class="text-decoration-none text-dark">
                         Reserva
-                        {% if request.args.get('sort_by') == 'reserva' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
+                        {% if request.args.get('sort_by') == 'precio_reserva' %}<i class="bi bi-arrow-{% if request.args.get('sort_order') == 'asc' %}up{% else %}down{% endif %}"></i>{% endif %}
                     </a>
                 </th>
                 <th>Acciones</th>
@@ -125,7 +125,7 @@
                 <td>{{ lanzamiento.fecha_salida | formato_fecha }}</td>
                 <td>{{ lanzamiento.fecha_envio | formato_fecha or '-' }}</td>
                 <td>{{ "%.2f"|format(lanzamiento.precio or 0) }}€</td>
-                <td>{{ "%.2f"|format(lanzamiento.reserva or 0) }}€</td>
+                <td>{{ "%.2f"|format(lanzamiento.precio_reserva or 0) }}€</td>
                 <td>
                     <a href="{{ url_for('lanzamientos.editar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
                     <form action="{{ url_for('lanzamientos.eliminar_lanzamiento', lanzamiento_id=lanzamiento.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este lanzamiento?');">
