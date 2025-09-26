@@ -5,6 +5,12 @@ on:
     branches:
       - main
 
+env:
+  PROJECT_ID: jocrol
+  GAR_LOCATION: europe-west1
+  SERVICE: jocrol
+  IMAGE_NAME: jocrol
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,22 +21,22 @@ jobs:
       - name: Google Auth
         uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          credentials_json: '${{ secrets.CREDENTIALS }}'
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
-      - name: Configure Docker
-        run: gcloud auth configure-docker
-
-      - name: Build and Push Container
-        run: gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/${{ secrets.GCP_PROJECT }}
+      - name: Build and Push Docker Image
+        run: |-
+          gcloud builds submit \
+            --tag "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
 
       - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy ${{ secrets.GCP_PROJECT }} \
-            --image gcr.io/${{ secrets.GCP_PROJECT }}/${{ secrets.GCP_PROJECT }} \
+        run: |-
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
+            --region ${{ env.GAR_LOCATION }} \
             --platform managed \
-            --region europe-west1 \
             --allow-unauthenticated \
-            --set-env-vars="SECRET_KEY=${{ secrets.SECRET_KEY }},MONGO_URI=${{ secrets.MONGO_URI }}"
+            --set-env-vars="MONGO_URI=${{ secrets.MONGO_URI }}" \
+            --set-env-vars="SECRET_KEY=${{ secrets.SECRET_KEY }}"
